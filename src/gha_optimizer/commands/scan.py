@@ -65,8 +65,6 @@ class ScanCommand:
                 return ScanResult(
                     success=False,
                     recommendations=[],
-                    estimated_savings=0.0,
-                    time_savings=0.0,
                     error="Repository must be in format 'owner/repo'"
                 )
             

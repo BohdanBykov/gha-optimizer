@@ -96,35 +96,17 @@ class GitHubClient:
             workflows = []
             
             for workflow_data in workflows_data.get("workflows", []):
-                # Get workflow file content from repository contents API
-                # workflow_data["path"] is like ".github/workflows/ci.yml"
-                file_path = workflow_data["path"]
-                contents_url = f"{self.base_url}/repos/{owner}/{repo}/contents/{file_path}"
-                
-                file_response = self.session.get(contents_url)
+                # Get workflow file content
+                workflow_file_url = workflow_data["url"]
+                file_response = self.session.get(workflow_file_url)
                 
                 if file_response.status_code == 200:
-                    file_data = file_response.json()
-                    
-                    # GitHub returns base64 encoded content
-                    import base64
-                    if file_data.get("encoding") == "base64":
-                        try:
-                            file_content = base64.b64decode(file_data["content"]).decode('utf-8')
-                        except Exception as e:
-                            self.logger.warning(f"Failed to decode {file_path}: {e}")
-                            continue
-                    else:
-                        # Fallback for other encodings
-                        file_content = file_data.get("content", "")
-                    
+                    file_content = file_response.text
                     workflow = Workflow.from_yaml(
-                        file_path=file_path,
+                        file_path=workflow_data["path"],
                         yaml_content=file_content
                     )
                     workflows.append(workflow)
-                else:
-                    self.logger.warning(f"Failed to fetch {file_path}: HTTP {file_response.status_code}")
             
             self.logger.info(f"Collected {len(workflows)} workflows")
             return workflows
