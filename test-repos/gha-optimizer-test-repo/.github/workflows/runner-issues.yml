@@ -1,0 +1,87 @@
+name: Runner Optimization Issues
+on: [push, pull_request]
+
+jobs:
+  # ❌ Over-provisioned runner for simple linting
+  lint:
+    runs-on: ubuntu-latest-8-cores  # Expensive for just linting!
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # Simple linting doesn't need 8 cores
+      - name: Run ESLint
+        run: npm run lint
+
+  # ❌ Under-provisioned runner for heavy compilation
+  compile:
+    runs-on: ubuntu-latest  # Too small for heavy build work
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # Heavy compilation would benefit from more cores
+      - name: Build TypeScript
+        run: npm run build:ts
+      
+      - name: Build Webpack bundles
+        run: npm run build:webpack
+      
+      - name: Compile Sass
+        run: npm run build:sass
+
+  # ❌ Wrong runner OS for the task
+  windows-specific:
+    runs-on: ubuntu-latest  # Should use Windows runner for Windows-specific tasks
+    steps:
+      - uses: actions/checkout@v3
+      
+      # These tasks should run on Windows
+      - name: Test Windows compatibility
+        run: |
+          echo "Testing Windows-specific features"
+          # This would fail on Linux but is using Linux runner
+
+  # ❌ Over-provisioned for simple file operations
+  file-checks:
+    runs-on: ubuntu-latest-4-cores  # Too expensive for file operations
+    steps:
+      - uses: actions/checkout@v3
+      
+      # Simple file operations don't need 4 cores
+      - name: Check file permissions
+        run: find . -name "*.sh" -exec chmod +x {} \;
+      
+      - name: Validate YAML files
+        run: yamllint .github/workflows/
+
+  # ❌ Should use GPU-enabled runner for ML tasks
+  machine-learning:
+    runs-on: ubuntu-latest  # Should use GPU runner for ML
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      # ML training would benefit from GPU
+      - name: Train model
+        run: |
+          pip install torch torchvision
+          python train_model.py  # This needs GPU acceleration

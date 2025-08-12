@@ -1,0 +1,59 @@
+name: Basic Node.js CI
+on: [push, pull_request]
+
+jobs:
+  # ❌ Sequential jobs that could be parallelized
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Missing Node.js dependency caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # ❌ All tests run sequentially instead of in parallel
+      - name: Unit tests
+        run: npm run test:unit
+      
+      - name: Integration tests  
+        run: npm run test:integration
+      
+      - name: E2E tests
+        run: npm run test:e2e
+      
+      - name: Lint
+        run: npm run lint
+      
+      - name: Type check
+        run: npm run type-check
+
+  # ❌ Duplicate setup work that could be shared
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Same setup repeated without caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+      
+      # ❌ Uploads everything including node_modules
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-files
+          path: .

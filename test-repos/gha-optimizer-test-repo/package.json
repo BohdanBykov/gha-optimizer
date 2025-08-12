@@ -1,0 +1,42 @@
+{
+  "name": "gha-optimizer-test-repo",
+  "version": "1.0.0",
+  "description": "Test repository for demonstrating GitHub Actions optimization opportunities",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "webpack --mode production",
+    "build:prod": "webpack --mode production --optimize-minimize",
+    "build:ts": "tsc",
+    "build:webpack": "webpack",
+    "build:sass": "sass src/styles:dist/css",
+    "build:frontend": "npm run build:ts && npm run build:webpack",
+    "docs:build": "typedoc src/",
+    "test": "jest",
+    "test:unit": "jest src/",
+    "test:integration": "jest integration/",
+    "test:e2e": "cypress run",
+    "test:performance": "lighthouse-ci",
+    "lint": "eslint src/",
+    "format:check": "prettier --check src/",
+    "type-check": "tsc --noEmit",
+    "validate": "npm ls",
+    "security:scan": "npm audit && snyk test"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^2.8.0",
+    "typescript": "^4.9.0",
+    "webpack": "^5.75.0",
+    "sass": "^1.57.0",
+    "cypress": "^12.0.0",
+    "lighthouse": "^9.6.0",
+    "snyk": "^1.1000.0",
+    "typedoc": "^0.23.0"
+  }
+}

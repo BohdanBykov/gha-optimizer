@@ -1,0 +1,108 @@
+name: Conditional Execution Issues
+# ❌ Runs on all changes, even when irrelevant files change
+on: [push, pull_request]
+
+jobs:
+  # ❌ Builds documentation on every change (even code changes)
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # This runs even when no docs files changed
+      - name: Build documentation
+        run: npm run docs:build
+
+  # ❌ Frontend build runs even when only backend files change
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # This should only run when frontend files change
+      - name: Build frontend
+        run: npm run build:frontend
+
+  # ❌ Backend tests run even when only frontend files change  
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      
+      # This should only run when backend files change
+      - name: Run backend tests
+        run: pytest backend/
+
+  # ❌ Docker build runs on every commit (expensive)
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # Expensive Docker build runs even for README changes
+      - name: Build Docker image
+        run: docker build -t myapp .
+
+  # ❌ Deployment preparation runs on feature branches
+  deploy-prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # This should only run on main branch
+      - name: Prepare deployment artifacts
+        run: |
+          echo "Preparing for deployment..."
+          npm run build:prod
+
+  # ❌ Security scans run on every PR (should be conditional)
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # Expensive security scan runs on every change
+      - name: Run security audit
+        run: |
+          npm audit
+          pip-audit
+          docker run --rm -v "$PWD":/app securecodewarrior/docker-image-security-scan
+
+  # ❌ Performance tests run on documentation changes
+  performance:
+    runs-on: ubuntu-latest-4-cores
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup environment
+        run: |
+          npm ci
+          npm run build
+      
+      # Expensive performance tests run unnecessarily
+      - name: Run performance tests
+        run: npm run test:performance

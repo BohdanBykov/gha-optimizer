@@ -1,0 +1,15 @@
+name: Docker Build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Missing Docker layer caching
+      - name: Build Docker image
+        run: docker build -t myapp .
+      
+      - name: Run tests in container
+        run: docker run --rm myapp npm test

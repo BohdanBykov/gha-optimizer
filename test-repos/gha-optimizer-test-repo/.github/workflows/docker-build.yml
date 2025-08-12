@@ -1,0 +1,54 @@
+name: Docker Build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Missing Docker layer caching
+      - name: Build Docker image
+        run: docker build -t myapp:${{ github.sha }} .
+      
+      - name: Run tests in container
+        run: docker run --rm myapp:${{ github.sha }} npm test
+      
+      # ❌ Building multiple images without layer reuse
+      - name: Build production image
+        run: docker build -t myapp:prod -f Dockerfile.prod .
+      
+      - name: Build development image  
+        run: docker build -t myapp:dev -f Dockerfile.dev .
+
+  # ❌ Separate job rebuilding same images
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Rebuilding image that was already built in previous job
+      - name: Build image for scanning
+        run: docker build -t myapp:scan .
+      
+      - name: Run security scan
+        run: |
+          # Simulate security scanning
+          docker run --rm myapp:scan npm audit
+      
+  push:
+    needs: [build, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Building the same image a third time
+      - name: Build final image
+        run: docker build -t myapp:latest .
+      
+      # ❌ No registry caching or optimization
+      - name: Push to registry
+        run: |
+          echo "Pushing myapp:latest to registry"
+          # docker push myapp:latest

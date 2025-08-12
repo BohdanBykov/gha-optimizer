@@ -1,0 +1,19 @@
+{
+  "name": "gha-optimizer-test-basic",
+  "version": "1.0.0",
+  "description": "Test repository for GHA-Optimizer basic optimization patterns",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest src/",
+    "test:integration": "jest integration/",
+    "lint": "eslint src/"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "eslint": "^8.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.0"
+  }
+}

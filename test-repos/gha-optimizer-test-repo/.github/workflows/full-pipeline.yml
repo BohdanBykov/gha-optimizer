@@ -1,0 +1,173 @@
+name: Full CI/CD Pipeline
+# ❌ Triggers on all changes without path filtering
+on: 
+  push:
+  pull_request:
+
+jobs:
+  # ❌ Over-provisioned runner for simple checks
+  validate:
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ No dependency caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # Simple validation doesn't need 8 cores
+      - name: Validate package.json
+        run: npm run validate
+      
+      - name: Check code formatting
+        run: npm run format:check
+
+  # ❌ Sequential jobs that could run in parallel
+  test-unit:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Duplicate setup without caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run unit tests
+        run: npm run test:unit
+
+  test-integration:
+    needs: validate  # ❌ Could run in parallel with unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Same setup repeated again
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run integration tests
+        run: npm run test:integration
+
+  test-e2e:
+    needs: validate  # ❌ Could run in parallel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Setup repeated yet again
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+  # ❌ Under-provisioned for heavy build
+  build:
+    needs: [test-unit, test-integration, test-e2e]
+    runs-on: ubuntu-latest  # Should use more cores for build
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Setup and dependencies repeated
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # Heavy build process needs more resources
+      - name: Build application
+        run: npm run build:prod
+      
+      - name: Build documentation
+        run: npm run docs:build
+      
+      # ❌ Uploads everything including node_modules
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: .
+
+  # ❌ Docker build without caching
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ No Docker layer caching
+      - name: Build Docker image
+        run: docker build -t myapp:${{ github.sha }} .
+      
+      - name: Test Docker image
+        run: docker run --rm myapp:${{ github.sha }} npm test
+
+  # ❌ Deployment runs on all branches
+  deploy:
+    needs: [build, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # This should only run on main branch
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Deployment logic here
+
+  # ❌ Expensive security scan runs on every change
+  security:
+    needs: build
+    runs-on: ubuntu-latest-4-cores  # Over-provisioned for security scan
+    steps:
+      - uses: actions/checkout@v3
+      
+      # ❌ Dependencies installed again without caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # Should only run on main branch or security-related changes
+      - name: Run security audit
+        run: |
+          npm audit
+          npm run security:scan
+
+  # ❌ Notification job that could be optimized
+  notify:
+    needs: [deploy, security]
+    runs-on: ubuntu-latest-4-cores  # Over-provisioned for simple notification
+    if: always()
+    steps:
+      - name: Send notification
+        run: |
+          echo "Pipeline completed"
+          # Simple notification doesn't need 4 cores
