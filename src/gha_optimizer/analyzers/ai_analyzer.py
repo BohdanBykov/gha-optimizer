@@ -188,14 +188,14 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
             if self.config.ai_provider == "anthropic":
                 return self._call_anthropic_api(prompt)
             else:
-                raise ValueError(f"Unsupported AI provider: {self.config.ai_provider}. Only 'anthropic' is supported.")
+                raise ValueError(
+                    f"Unsupported AI provider: {self.config.ai_provider}. Only 'anthropic' is supported."
+                )
 
         except Exception as e:
             self.logger.error(f"AI API call failed: {e}")
             # Return fallback analysis based on simple pattern matching
             return self._fallback_pattern_analysis(prompt)
-
-
 
     def _call_anthropic_api(self, prompt: str) -> List[Dict[str, Any]]:
         """Call Anthropic Claude API for workflow analysis with simple retry logic."""
