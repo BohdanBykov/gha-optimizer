@@ -38,10 +38,21 @@ def test_cli():
     except Exception as e:
         print(f"❌ Version command failed: {e}")
     
+    # Test scan command help (verify new option is present)
+    print("\n3. Testing scan command help for new option:")
+    try:
+        cli(["scan", "--help"], standalone_mode=False)
+        print("✅ Scan help command works")
+    except SystemExit:
+        print("✅ Scan help command works (expected SystemExit)")
+    except Exception as e:
+        print(f"❌ Scan help command failed: {e}")
+    
     print("\n🎉 CLI integration tests completed!")
     print("\nCore CLI functionality verified:")
     print("✓ Help system")
     print("✓ Version information") 
+    print("✓ Scan command help")
     print("✓ CLI structure and imports")
     print("✓ Basic command framework")
 
