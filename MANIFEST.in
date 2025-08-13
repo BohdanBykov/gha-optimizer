@@ -1,0 +1,42 @@
+# Include package metadata
+include README.md
+include CHANGELOG.md
+include requirements.txt
+include pyproject.toml
+include INSTALL.md
+include CONTRIBUTING.md
+
+# Include documentation
+recursive-include docs *.md
+
+# Include examples
+recursive-include examples *.yml *.yaml *.md
+
+# Include configuration files
+include config.yml
+include .pre-commit-config.yaml
+include .markdownlint.yaml
+
+# Include source code (excluding templates as none exist)
+recursive-include src *.py
+
+# Include test files
+include test_cli.py
+recursive-include test-repos *
+recursive-include scripts *.sh
+
+# Exclude build artifacts and cache
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *.pyd
+global-exclude __pycache__
+global-exclude .DS_Store
+global-exclude *.so
+global-exclude .git*
+global-exclude .pytest_cache
+global-exclude .mypy_cache
+global-exclude .coverage
+global-exclude htmlcov
+global-exclude dist
+global-exclude build
+global-exclude *.egg-info

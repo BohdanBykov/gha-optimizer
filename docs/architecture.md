@@ -130,15 +130,14 @@ class Workflow:
 ```python
 class AIWorkflowAnalyzer:
     def analyze_workflows(self, workflows: Dict[str, str], repository_stats: Dict[str, Any]) -> List[Dict[str, Any]]
-    def _call_openai_api(self, prompt: str) -> List[Dict[str, Any]]
     def _call_anthropic_api(self, prompt: str) -> List[Dict[str, Any]]
     def _fallback_pattern_analysis(self, prompt: str) -> List[Dict[str, Any]]
 ```
 
 **AI Features**:
-- **Dual AI Support**: OpenAI GPT-4 and Anthropic Claude integration
+- **Anthropic Claude Integration**: Advanced AI-powered analysis
 - **Structured Prompts**: Based on documented optimization patterns
-- **Robust Fallback**: Pattern-based analysis when AI APIs fail
+- **Robust Fallback**: Pattern-based analysis when AI API fails
 - **Cost Calculations**: Real GitHub Actions pricing integration
 - **Confidence Scoring**: AI-provided confidence levels for recommendations
 
@@ -217,8 +216,7 @@ GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs
 ### External Services
 
 - **AI Services**: 
-  - OpenAI GPT-4 API for intelligent analysis
-  - Anthropic Claude API as primary AI provider
+  - Anthropic Claude API for intelligent analysis
 - **GitHub API**: REST API for workflow and run data collection
 - **Configuration**: YAML-based config with environment variable support
 
@@ -245,7 +243,7 @@ github:
   api_url: "https://api.github.com"
 
 ai:
-  provider: "anthropic"  # or "openai"
+  provider: "anthropic"
   api_key: "sk-ant-your_key_here"
   model: "claude-3-5-sonnet-20241022"
 

@@ -123,7 +123,7 @@ Language: Python 3.9+
 Dependencies:
   - requests (GitHub API)
   - PyYAML (Workflow parsing)
-  - openai (AI integration)
+  - anthropic (AI integration)
   - click (CLI interface)
   - jinja2 (Report templating)
   - pytest (Testing)

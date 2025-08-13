@@ -82,36 +82,34 @@ curl -H "Authorization: token $GITHUB_TOKEN" \
 
 ## 🤖 **Step 3: AI API Token Setup**
 
-### **Option A: OpenAI (Recommended)**
+### **Anthropic Claude Setup**
 
-1. **Create OpenAI Account**:
-   - Go to https://platform.openai.com/
+1. **Create Anthropic Account**:
+   - Go to https://console.anthropic.com/
    - Sign up or log in
 
 2. **Generate API Key**:
    - Navigate to API Keys section
-   - Click "Create new secret key"
+   - Create new API key
    - Name: `gha-optimizer-testing`
-   - Copy the key (starts with `sk-`)
+   - Copy the key (starts with `sk-ant-`)
 
 3. **Set Environment Variable**:
    ```bash
-   export OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   export ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    
    # Add to shell profile for persistence
-   echo 'export OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' >> ~/.bashrc
+   echo 'export ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' >> ~/.bashrc
    source ~/.bashrc
    ```
 
-4. **Test OpenAI API**:
+4. **Test Anthropic API**:
    ```bash
-   curl -H "Authorization: Bearer $OPENAI_API_KEY" \
+   curl -H "x-api-key: $ANTHROPIC_API_KEY" \
         -H "Content-Type: application/json" \
-        -d '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Hello!"}], "max_tokens": 10}' \
-        https://api.openai.com/v1/chat/completions
+        -d '{"model": "claude-3-5-sonnet-20241022", "max_tokens": 10, "messages": [{"role": "user", "content": "Hello!"}]}' \
+        https://api.anthropic.com/v1/messages
    ```
-
-### **Option B: Anthropic Claude**
 
 1. **Create Anthropic Account**:
    - Go to https://console.anthropic.com/
@@ -142,9 +140,9 @@ github:
   api_url: "https://api.github.com"
 
 ai:
-  provider: "openai"  # or "anthropic"
-  api_key: "${OPENAI_API_KEY}"  # or ANTHROPIC_API_KEY
-  model: "gpt-4"
+  provider: "anthropic"
+  api_key: "${ANTHROPIC_API_KEY}"
+  model: "claude-3-5-sonnet-20241022"
 
 analysis:
   max_history_days: 30
