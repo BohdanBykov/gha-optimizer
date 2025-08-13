@@ -3,7 +3,7 @@
 import base64
 import logging
 from functools import lru_cache
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import requests
 
@@ -54,7 +54,7 @@ class GitHubClient:
         )
 
         # Set reasonable timeouts
-        session.timeout = (10, 30)  # (connect_timeout, read_timeout)
+        # Note: Session.timeout is not a standard attribute, using per-request timeout instead
 
         # Configure retries for connection issues
         from requests.adapters import HTTPAdapter
@@ -164,8 +164,8 @@ class GitHubClient:
                 runs_url = f"{self.base_url}/repos/{owner}/{repo}/actions/runs"
 
             # Add parameters for recent runs
-            params = {
-                "per_page": 100,
+            params: Dict[str, str] = {
+                "per_page": "100",
                 "status": "completed",  # Only get completed runs for analysis
             }
 

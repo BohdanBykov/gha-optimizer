@@ -2,7 +2,7 @@
 
 import logging
 from functools import wraps
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -30,7 +30,7 @@ def safe_execute(
 
     def decorator(func: F) -> F:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             log = logger or logging.getLogger(__name__)
             try:
                 return func(*args, **kwargs)
@@ -40,7 +40,7 @@ def safe_execute(
                     raise
                 return default_return
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
 
@@ -93,7 +93,9 @@ def validate_list(value: Any, field_name: str, allow_empty: bool = True) -> list
     return value
 
 
-def safe_get(dictionary: dict, key: str, default: Any = None, expected_type: type = None) -> Any:
+def safe_get(
+    dictionary: dict, key: str, default: Any = None, expected_type: Optional[type] = None
+) -> Any:
     """
     Safely get value from dictionary with optional type checking.
 
@@ -123,18 +125,21 @@ class SimpleTimer:
     def __init__(self, operation_name: str, logger: Optional[logging.Logger] = None):
         self.operation_name = operation_name
         self.logger = logger or logging.getLogger(__name__)
-        self.start_time = None
+        self.start_time: Optional[float] = None
 
-    def __enter__(self):
+    def __enter__(self) -> "SimpleTimer":
         import time
 
         self.start_time = time.time()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         import time
 
-        duration = time.time() - self.start_time
+        if self.start_time is not None:
+            duration = time.time() - self.start_time
+        else:
+            duration = 0.0
         self.logger.debug(f"{self.operation_name} completed in {duration:.2f}s")
 
 
@@ -158,7 +163,7 @@ def format_error_message(error: Exception, context: str = "") -> str:
         return f"{error_type}: {error_msg}"
 
 
-def find_yaml_line_numbers(yaml_content: str, search_patterns: list) -> dict:
+def find_yaml_line_numbers(yaml_content: str, search_patterns: List[str]) -> Dict[str, List[int]]:
     """
     Find line numbers for specific patterns in YAML content.
 
@@ -170,7 +175,7 @@ def find_yaml_line_numbers(yaml_content: str, search_patterns: list) -> dict:
         Dictionary mapping patterns to line numbers where they're found
     """
     lines = yaml_content.split("\n")
-    line_numbers = {}
+    line_numbers: Dict[str, List[int]] = {}
 
     for pattern in search_patterns:
         pattern_lower = pattern.lower()

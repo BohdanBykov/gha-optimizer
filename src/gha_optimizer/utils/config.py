@@ -21,24 +21,22 @@ class Config:
     @property
     def github_api_url(self) -> str:
         """Get GitHub API URL."""
-        return self._config.get("github", {}).get("api_url", "https://api.github.com")
+        return str(self._config.get("github", {}).get("api_url", "https://api.github.com"))
 
     @property
     def ai_provider(self) -> str:
-        """Get AI provider (openai or anthropic)."""
-        return self._config.get("ai", {}).get("provider", "openai")
+        """Get AI provider (anthropic only)."""
+        return str(self._config.get("ai", {}).get("provider", "anthropic"))
 
     @property
     def ai_api_key(self) -> Optional[str]:
         """Get AI API key from config or environment."""
         ai_key = self._config.get("ai", {}).get("api_key")
         if ai_key:
-            return ai_key
+            return str(ai_key)
 
-        # Try environment variables based on provider
-        if self.ai_provider == "openai":
-            return os.getenv("OPENAI_API_KEY")
-        elif self.ai_provider == "anthropic":
+        # Try environment variable for Anthropic
+        if self.ai_provider == "anthropic":
             return os.getenv("ANTHROPIC_API_KEY")
 
         return None
@@ -47,42 +45,43 @@ class Config:
     def ai_model(self) -> str:
         """Get AI model name."""
         default_models = {
-            "openai": "gpt-4",
             "anthropic": "claude-3-sonnet-20240229",
         }
-        return self._config.get("ai", {}).get(
-            "model", default_models.get(self.ai_provider, "gpt-4")
+        return str(
+            self._config.get("ai", {}).get(
+                "model", default_models.get(self.ai_provider, "claude-3-sonnet-20240229")
+            )
         )
 
     @property
     def max_history_days(self) -> int:
         """Get maximum days of workflow history to analyze."""
-        return self._config.get("analysis", {}).get("max_history_days", 30)
+        return int(self._config.get("analysis", {}).get("max_history_days", 30))
 
     @property
     def confidence_threshold(self) -> float:
         """Get confidence threshold for recommendations."""
-        return self._config.get("analysis", {}).get("confidence_threshold", 0.7)
+        return float(self._config.get("analysis", {}).get("confidence_threshold", 0.7))
 
     @property
     def parallel_requests(self) -> int:
         """Get number of parallel requests to make."""
-        return self._config.get("analysis", {}).get("parallel_requests", 5)
+        return int(self._config.get("analysis", {}).get("parallel_requests", 5))
 
     @property
     def default_output_format(self) -> str:
         """Get default output format."""
-        return self._config.get("output", {}).get("default_format", "markdown")
+        return str(self._config.get("output", {}).get("default_format", "markdown"))
 
     @property
     def include_code_examples(self) -> bool:
         """Whether to include code examples in output."""
-        return self._config.get("output", {}).get("include_code_examples", True)
+        return bool(self._config.get("output", {}).get("include_code_examples", True))
 
     @property
     def generate_pr_descriptions(self) -> bool:
         """Whether to generate PR descriptions."""
-        return self._config.get("output", {}).get("generate_pr_descriptions", True)
+        return bool(self._config.get("output", {}).get("generate_pr_descriptions", True))
 
 
 def load_config(config_path: Optional[Path] = None) -> Config:
@@ -126,7 +125,7 @@ def load_config(config_path: Optional[Path] = None) -> Config:
     # Apply default configuration
     default_config = {
         "github": {"api_url": "https://api.github.com"},
-        "ai": {"provider": "openai", "model": "gpt-4"},
+        "ai": {"provider": "anthropic", "model": "claude-3-sonnet-20240229"},
         "analysis": {
             "max_history_days": 30,
             "confidence_threshold": 0.7,

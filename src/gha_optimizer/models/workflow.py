@@ -25,7 +25,7 @@ class Job:
     if_condition: Optional[str] = None
     strategy: Optional[Dict[str, Any]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Simple validation after initialization."""
         self.name = validate_string(self.name, "Job name")
         self.runs_on = validate_string(self.runs_on, "Job runs_on")
@@ -52,7 +52,7 @@ class Workflow:
     jobs: List[Job]
     triggers: List[Trigger]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Simple validation after initialization."""
         self.name = validate_string(self.name, "Workflow name")
         self.file_path = validate_string(self.file_path, "Workflow file_path")
@@ -98,7 +98,7 @@ class Workflow:
                         needs=(
                             job_config.get("needs", [])
                             if isinstance(job_config.get("needs"), list)
-                            else ([job_config.get("needs")] if job_config.get("needs") else [])
+                            else ([str(job_config.get("needs"))] if job_config.get("needs") else [])
                         ),
                         if_condition=job_config.get("if"),
                         strategy=job_config.get("strategy"),

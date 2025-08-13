@@ -143,8 +143,8 @@ class ConsoleReporter:
 
     def _build_breakdown_lines(self, recommendations: List[Dict[str, Any]]) -> List[str]:
         """Build optimization breakdown lines."""
-        type_counts = {}
-        type_savings = {}
+        type_counts: Dict[str, int] = {}
+        type_savings: Dict[str, float] = {}
 
         for rec in recommendations:
             opt_type = rec.get("type", "other")
@@ -168,7 +168,12 @@ class ConsoleReporter:
         self, recommendations: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """Build priority sections for template."""
-        priority_groups = {"critical": [], "high": [], "medium": [], "low": []}
+        priority_groups: Dict[str, List[Dict[str, Any]]] = {
+            "critical": [],
+            "high": [],
+            "medium": [],
+            "low": [],
+        }
 
         # Group recommendations
         for rec in recommendations:

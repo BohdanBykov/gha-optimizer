@@ -181,75 +181,21 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
 """
 
     def _call_ai_api(self, prompt: str) -> List[Dict[str, Any]]:
-        """Call AI API with real implementation for OpenAI or Anthropic."""
+        """Call Anthropic Claude AI API for workflow analysis."""
         self.logger.debug(f"Calling {self.config.ai_provider} API with {self.config.ai_model}")
 
         try:
-            if self.config.ai_provider == "openai":
-                return self._call_openai_api(prompt)
-            elif self.config.ai_provider == "anthropic":
+            if self.config.ai_provider == "anthropic":
                 return self._call_anthropic_api(prompt)
             else:
-                raise ValueError(f"Unsupported AI provider: {self.config.ai_provider}")
+                raise ValueError(f"Unsupported AI provider: {self.config.ai_provider}. Only 'anthropic' is supported.")
 
         except Exception as e:
             self.logger.error(f"AI API call failed: {e}")
             # Return fallback analysis based on simple pattern matching
             return self._fallback_pattern_analysis(prompt)
 
-    def _call_openai_api(self, prompt: str) -> List[Dict[str, Any]]:
-        """Call OpenAI API for workflow analysis with simple retry logic."""
-        max_retries = 3
-        base_delay = 1
 
-        for attempt in range(max_retries):
-            try:
-                import openai
-
-                client = openai.OpenAI(api_key=self.config.ai_api_key)
-
-                self.logger.debug(
-                    f"Making OpenAI API request (attempt {attempt + 1}/{max_retries})"
-                )
-                response = client.chat.completions.create(
-                    model=self.config.ai_model,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a GitHub Actions optimization expert. Always return valid JSON arrays with optimization recommendations.",
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
-                    temperature=0.3,  # Lower temperature for more consistent results
-                    max_tokens=4000,
-                )
-
-                content = response.choices[0].message.content.strip()
-                self.logger.debug(f"OpenAI response length: {len(content)} characters")
-
-                # Parse JSON response
-                # Extract JSON from markdown code blocks if present
-                json_content = self._extract_json_from_response(content)
-                recommendations = json.loads(json_content)
-                if not isinstance(recommendations, list):
-                    self.logger.warning("OpenAI returned non-list response, wrapping in list")
-                    recommendations = [recommendations]
-
-                return recommendations
-
-            except json.JSONDecodeError as e:
-                self.logger.error(f"Failed to parse OpenAI JSON response: {e}")
-                raise  # Don't retry JSON parse errors
-            except Exception as e:
-                if attempt == max_retries - 1:  # Last attempt
-                    self.logger.error(f"OpenAI API error after {max_retries} attempts: {e}")
-                    raise
-                else:
-                    delay = base_delay * (2**attempt)  # Exponential backoff
-                    self.logger.warning(
-                        f"OpenAI API error (attempt {attempt + 1}): {e}. Retrying in {delay}s..."
-                    )
-                    time.sleep(delay)
 
     def _call_anthropic_api(self, prompt: str) -> List[Dict[str, Any]]:
         """Call Anthropic Claude API for workflow analysis with simple retry logic."""
@@ -272,7 +218,13 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
                     messages=[{"role": "user", "content": prompt}],
                 )
 
-                content = response.content[0].text.strip()
+                # Handle different content block types
+                content_block = response.content[0]
+                if hasattr(content_block, "text"):
+                    content = content_block.text.strip()
+                else:
+                    self.logger.error(f"Unexpected content block type: {type(content_block)}")
+                    return []
                 self.logger.debug(f"Anthropic response length: {len(content)} characters")
                 self.logger.debug(f"Anthropic response content: {repr(content[:500])}")
 
@@ -303,6 +255,9 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
                         f"Anthropic API error (attempt {attempt + 1}): {e}. Retrying in {delay}s..."
                     )
                     time.sleep(delay)
+
+        # This should never be reached due to the loop structure, but mypy requires it
+        return []
 
     def _fallback_pattern_analysis(self, prompt: str) -> List[Dict[str, Any]]:
         """Fallback pattern-based analysis when AI API fails."""
@@ -535,7 +490,7 @@ ANALYSIS INSTRUCTIONS:
             # Use the first JSON block found
             json_content = matches[0].strip()
             self.logger.debug(f"Extracted JSON from code block: {len(json_content)} chars")
-            return json_content
+            return str(json_content)
 
         # Look for array starting with [ and ending with ]
         array_pattern = r"(\[.*\])"
@@ -544,7 +499,7 @@ ANALYSIS INSTRUCTIONS:
         if array_matches:
             json_content = array_matches[0].strip()
             self.logger.debug(f"Extracted JSON array from response: {len(json_content)} chars")
-            return json_content
+            return str(json_content)
 
         # If no patterns found, return the original content
         self.logger.debug("No JSON patterns found, using original content")
