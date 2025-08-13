@@ -16,7 +16,7 @@ class ScanResult:
     """Result of scan command execution."""
 
     success: bool
-    recommendations: List[str]
+    recommendations: List[Dict[str, Any]]
     estimated_savings: float
     time_savings: float
     error: Optional[str] = None
@@ -67,6 +67,8 @@ class ScanCommand:
                 return ScanResult(
                     success=False,
                     recommendations=[],
+                    estimated_savings=0.0,
+                    time_savings=0.0,
                     error="Repository must be in format 'owner/repo'",
                 )
 
