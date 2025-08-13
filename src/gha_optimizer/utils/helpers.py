@@ -2,7 +2,7 @@
 
 import logging
 from functools import wraps
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Any, Callable, Optional, TypeVar
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -282,7 +282,8 @@ def validate_cost_calculation(
         "runs_per_week": runs_per_week,
         "validation_method": validation_method,
         "recommendation": (
-            f"Expected ${expected_savings:.2f}, got ${monthly_savings:.2f} ({percentage_diff:.1f}% diff)"
+            f"Expected ${expected_savings:.2f}, got ${monthly_savings:.2f} "
+            f"({percentage_diff:.1f}% diff)"
             if not is_reasonable
             else f"Validated: ${monthly_savings:.2f}/month ({validation_method})"
         ),

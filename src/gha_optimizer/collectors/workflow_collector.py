@@ -56,7 +56,8 @@ class WorkflowCollector:
             repo_metadata = github_client.collect_repository_metadata(owner, repo)
 
             self.logger.info(
-                f"Successfully collected data: {len(workflows)} workflows, {len(workflow_runs)} runs"
+                f"Successfully collected data: {len(workflows)} workflows, "
+                f"{len(workflow_runs)} runs"
             )
 
             return {

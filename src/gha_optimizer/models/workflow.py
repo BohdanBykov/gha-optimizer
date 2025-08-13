@@ -9,7 +9,6 @@ import yaml
 from ..utils.config import Config
 from ..utils.helpers import (
     SimpleTimer,
-    safe_execute,
     validate_list,
     validate_string,
 )

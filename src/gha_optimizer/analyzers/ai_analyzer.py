@@ -8,10 +8,7 @@ from functools import lru_cache
 from typing import Any, Dict, List, Optional
 
 from ..utils.config import Config
-from ..utils.helpers import (
-    calculate_github_actions_cost,
-    validate_cost_calculation,
-)
+from ..utils.helpers import validate_cost_calculation
 
 
 class AIWorkflowAnalyzer:
@@ -169,7 +166,7 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
     "type": "caching",
     "priority": "high",
     "workflow_file": ".github/workflows/ci.yml",
-    "job_name": "build", 
+    "job_name": "build",
     "line_number": "47",
     "description": "Missing npm dependency caching causing repeated installs",
     "impact_time_minutes": 3.0,
@@ -374,7 +371,7 @@ OPTIMIZATION PATTERNS TO DETECT:
 - Implementation: Add actions/cache@v3 with path ~/.npm and key based on package-lock.json
 - Impact: 2-5 minutes saved per run, ~$50-150/month cost reduction
 
-**Python Dependencies:**  
+**Python Dependencies:**
 - Pattern: Look for "pip install" WITHOUT preceding actions/cache step
 - Implementation: Add actions/cache@v3 with path ~/.cache/pip and key based on requirements.txt
 - Impact: 1-3 minutes saved per run
@@ -410,7 +407,7 @@ OPTIMIZATION PATTERNS TO DETECT:
 - Implementation: Add paths filter to workflow triggers
 - Impact: Reduce unnecessary runs by 30-50%
 
-### ARTIFACT OPTIMIZATION  
+### ARTIFACT OPTIMIZATION
 - Pattern: Uploading entire workspace as artifacts
 - Pattern: Large artifacts without compression
 - Implementation: Selective artifact upload, exclude unnecessary files
@@ -491,7 +488,7 @@ ANALYSIS INSTRUCTIONS:
                 if "Cost adjusted:" not in processed_rec["description"]:
                     processed_rec[
                         "description"
-                    ] += f" (Cost calculation adjusted based on usage patterns)"
+                    ] += " (Cost calculation adjusted based on usage patterns)"
             else:
                 validation_stats["passed"] += 1
                 self.logger.debug(

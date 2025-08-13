@@ -2,7 +2,6 @@
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -82,7 +81,10 @@ class ScanCommand:
                     recommendations=[],
                     estimated_savings=0.0,
                     time_savings=0.0,
-                    error="GitHub token is required. Set GITHUB_TOKEN environment variable or use --token",
+                    error=(
+                        "GitHub token is required. Set GITHUB_TOKEN environment variable "
+                        "or use --token"
+                    ),
                 )
 
             # Validate AI configuration (mandatory)
@@ -92,7 +94,10 @@ class ScanCommand:
                     recommendations=[],
                     estimated_savings=0.0,
                     time_savings=0.0,
-                    error="AI API key is required for analysis. Set your AI API key in config or environment.",
+                    error=(
+                        "AI API key is required for analysis. Set your AI API key in "
+                        "config or environment."
+                    ),
                 )
 
             # Collect real workflow data from GitHub

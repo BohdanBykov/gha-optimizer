@@ -132,7 +132,7 @@ def scan(
         )
 
         if result.success:
-            click.echo(f"✅ Analysis completed!")
+            click.echo("✅ Analysis completed!")
             click.echo(f"📈 Found {len(result.recommendations)} optimization opportunities")
             click.echo(f"💰 Potential monthly savings: ${result.estimated_savings:.0f}")
             click.echo(f"⏱️  Potential time savings: {result.time_savings:.1f} minutes per run")
