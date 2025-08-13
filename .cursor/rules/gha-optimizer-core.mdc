@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+
+# GHA-Optimizer Core Development Rules
+
+## MANDATORY ACKNOWLEDGMENT
+Before responding to ANY request about GHA-Optimizer, you MUST:
+1. Confirm you have read ALL instructions in [.ai_assistant_config.md](mdc:.ai_assistant_config.md)
+2. State which files you will update for the specific task
+3. Acknowledge the constraints (Python 3.11+, Anthropic only, KISS principle)
+4. Say: "I understand the GHA-Optimizer requirements and will follow all guidelines."
+
+## Project Overview
+GHA-Optimizer is a GitHub Actions workflow optimization tool that uses Anthropic Claude AI to analyze and improve CI/CD pipelines. The main entry point is [src/gha_optimizer/cli/main.py](mdc:src/gha_optimizer/cli/main.py).
+
+## Technology Stack (REQUIRED - DO NOT DEVIATE)
+- **Python 3.11+ ONLY** - No multiple version support
+- **Anthropic Claude API ONLY** - No other AI providers
+- **Click Framework** - For CLI commands (see [pyproject.toml](mdc:pyproject.toml))
+- **Trunk-based Development** - No long-lived feature branches
+
+## Absolutely Forbidden
+- Multiple Python version support
+- Complex CI/CD automation
+- PyPI publishing (GitHub releases only)
+- Long-lived feature branches
+- OpenAI or other AI providers
+
+## Core Principles
+1. **KISS (Keep It Simple Stupid)** - Always choose simple solutions
+2. **Junior Developer Focus** - Write everything for less experienced developers
+3. **Explicit over Implicit** - Favor clear patterns over magical behavior
+4. **Conservative Approach** - Default to well-tested solutions
+
+## Required Validation Commands (ALL must pass)
+```bash
+python test_cli.py                    # Integration tests
+black src/ && isort src/              # Code formatting
+flake8 src/                           # Linting
+mypy src/gha_optimizer                # Type checking
+bandit -r src/gha_optimizer           # Security scanning
+```
+
+## Files to Always Review
+For EVERY task, check these core files: [pyproject.toml](mdc:pyproject.toml), [src/gha_optimizer/__init__.py](mdc:src/gha_optimizer/__init__.py)
+
+Update if affected: [README.md](mdc:README.md), [CONTRIBUTING.md](mdc:CONTRIBUTING.md), [INSTALL.md](mdc:INSTALL.md), [MANIFEST.in](mdc:MANIFEST.in), [test_cli.py](mdc:test_cli.py)

@@ -1,0 +1,93 @@
+---
+description: Documentation files that must be reviewed and updated when making changes
+---
+
+# Documentation Update Requirements
+
+## Files That Must Be Reviewed for Every Change
+
+### Core Files (always check)
+- [pyproject.toml](mdc:pyproject.toml) - Dependencies, version, metadata
+- [src/gha_optimizer/__init__.py](mdc:src/gha_optimizer/__init__.py) - Version/exports changes
+
+### Documentation Files (update if affected)
+- [README.md](mdc:README.md) - Main user-facing guide
+- [CONTRIBUTING.md](mdc:CONTRIBUTING.md) - Development process
+- [INSTALL.md](mdc:INSTALL.md) - Installation steps
+- [docs/](mdc:docs/) - Technical documentation
+
+### CI/CD Files (update if affected)
+- [.github/workflows/](mdc:.github/workflows/) - CI/CD workflows
+- [.pre-commit-config.yaml](mdc:.pre-commit-config.yaml) - Pre-commit hooks
+
+### Packaging Files (update if affected)
+- [MANIFEST.in](mdc:MANIFEST.in) - File inclusion rules
+- [test_cli.py](mdc:test_cli.py) - Integration tests
+
+## Documentation Standards
+- Write for junior developers - use clear, simple language
+- Include working examples for new features
+- Explain the "why" behind technical decisions
+- Keep documentation synchronized with code changes
+- Avoid jargon - prefer explicit explanations
+
+## README.md Updates Required For
+- New CLI commands or options
+- Changed installation requirements  
+- New configuration options
+- Updated usage examples
+- Changed dependencies or requirements
+
+## CONTRIBUTING.md Updates Required For
+- New development tools or requirements
+- Changed validation commands
+- Updated development workflow
+- New coding standards or patterns
+
+## pyproject.toml Updates Required For
+- New dependencies added
+- Version changes
+- Changed CLI entry points
+- Updated project metadata
+
+## INSTALL.md Updates Required For
+- Changed Python version requirements
+- New system dependencies
+- Updated installation steps
+- Changed virtual environment setup
+
+## Integration Test Updates
+Update [test_cli.py](mdc:test_cli.py) when:
+- Adding new CLI commands
+- Changing command interfaces
+- Modifying output formats
+- Adding new error conditions
+
+## Documentation Writing Guidelines
+1. **Clarity First**: Write for someone unfamiliar with the codebase
+2. **Examples**: Include concrete examples for abstract concepts
+3. **Context**: Explain why decisions were made, not just what
+4. **Consistency**: Use the same terminology throughout all docs
+5. **Updates**: Keep docs current with any code changes
+
+## Common Documentation Patterns
+```markdown
+## Command Usage
+\`\`\`bash
+# Basic usage
+gha-optimizer scan --repo owner/repository-name
+
+# With configuration file
+gha-optimizer scan --config config.yml --repo owner/repo
+\`\`\`
+
+## Configuration
+\`\`\`yaml
+github:
+  token: ${GITHUB_TOKEN}
+  
+anthropic:
+  api_key: ${ANTHROPIC_API_KEY}
+  model: claude-3-sonnet-20240229
+\`\`\`
+```
