@@ -27,7 +27,8 @@ from ..utils.logger import setup_logger
     help="Path to configuration file",
 )
 @click.option(
-    "--verbose", "-v",
+    "--verbose",
+    "-v",
     is_flag=True,
     help="Enable verbose logging",
 )
@@ -35,10 +36,10 @@ from ..utils.logger import setup_logger
 def cli(ctx: click.Context, config: Optional[Path], verbose: bool) -> None:
     """
     GHA-Optimizer: AI-Powered GitHub Actions Workflow Optimization Tool
-    
+
     Analyze GitHub Actions workflows and get actionable optimization recommendations
     with quantified impact metrics.
-    
+
     \b
     Examples:
         gha-optimizer scan microsoft/vscode
@@ -46,7 +47,7 @@ def cli(ctx: click.Context, config: Optional[Path], verbose: bool) -> None:
     """
     # Set up logging
     logger = setup_logger(verbose=verbose)
-    
+
     # Load configuration
     try:
         app_config = load_config(config)
@@ -66,7 +67,8 @@ def cli(ctx: click.Context, config: Optional[Path], verbose: bool) -> None:
     help="GitHub personal access token",
 )
 @click.option(
-    "--output", "-o",
+    "--output",
+    "-o",
     type=click.Path(path_type=Path),
     help="Output file for detailed report",
 )
@@ -76,30 +78,35 @@ def cli(ctx: click.Context, config: Optional[Path], verbose: bool) -> None:
     default="markdown",
     help="Output format for the report",
 )
-
 @click.option(
     "--max-history-days",
     type=int,
     default=30,
     help="Maximum days of workflow history to analyze",
 )
+@click.option(
+    "--output-prompt-file",
+    type=click.Path(path_type=Path),
+    help="Debug: Save AI prompt to file without making API call",
+)
 @click.pass_context
 def scan(
-    ctx: click.Context, 
-    repository: str, 
-    token: Optional[str], 
-    output: Optional[Path], 
+    ctx: click.Context,
+    repository: str,
+    token: Optional[str],
+    output: Optional[Path],
     format: str,
-    max_history_days: int
+    max_history_days: int,
+    output_prompt_file: Optional[Path],
 ) -> None:
     """
     Analyze GitHub repository workflows and generate optimization report.
-    
+
     Scans workflows, checks for optimization patterns, analyzes run statistics,
     and generates a comprehensive report with improvement recommendations.
-    
+
     REPOSITORY: GitHub repository in format 'owner/repo'
-    
+
     \b
     Examples:
         gha-optimizer scan microsoft/vscode
@@ -107,12 +114,12 @@ def scan(
     """
     logger = ctx.obj["logger"]
     config = ctx.obj["config"]
-    
+
     click.echo(f"🔍 Analyzing repository: {repository}")
 
     # Import here to avoid circular imports
     from ..commands.scan import ScanCommand
-    
+
     try:
         scan_cmd = ScanCommand(config=config, logger=logger)
         result = scan_cmd.execute(
@@ -121,27 +128,31 @@ def scan(
             output_file=output,
             output_format=format,
             max_history_days=max_history_days,
+            output_prompt_file=output_prompt_file,
         )
-        
+
         if result.success:
             click.echo(f"✅ Analysis completed!")
-            click.echo(f"📈 Found {len(result.recommendations)} optimization opportunities")
-            click.echo(f"💰 Potential monthly savings: ${result.estimated_savings:.0f}")
-            click.echo(f"⏱️  Potential time savings: {result.time_savings:.1f} minutes per run")
-            
+            click.echo(
+                f"📈 Found {len(result.recommendations)} optimization opportunities"
+            )
+            click.echo(
+                f"💰 Potential monthly savings: ${result.estimated_savings:.0f}"
+            )
+            click.echo(
+                f"⏱️  Potential time savings: {result.time_savings:.1f} minutes per run"
+            )
+
             if output:
                 click.echo(f"📄 Detailed report saved to: {output}")
         else:
             click.echo(f"❌ Analysis failed: {result.error}", err=True)
             sys.exit(1)
-            
+
     except Exception as e:
         logger.error(f"Scan command failed: {e}")
         click.echo(f"❌ Error: {e}", err=True)
         sys.exit(1)
-
-
-
 
 
 @cli.command()
@@ -172,12 +183,12 @@ def apply(
 ) -> None:
     """
     Open pull requests with optimizations based on scan findings.
-    
+
     Creates GitHub pull requests with workflow optimizations
     based on previously identified improvement opportunities.
-    
+
     REPOSITORY: GitHub repository in format 'owner/repo'
-    
+
     \b
     Examples:
         gha-optimizer apply microsoft/vscode
@@ -185,15 +196,15 @@ def apply(
     """
     logger = ctx.obj["logger"]
     config = ctx.obj["config"]
-    
+
     if dry_run:
         click.echo(f"🧪 Dry run: Showing optimizations for {repository}")
     else:
         click.echo(f"🚀 Creating pull requests for {repository}")
-    
+
     # Import here to avoid circular imports
     from ..commands.apply import ApplyCommand
-    
+
     try:
         apply_cmd = ApplyCommand(config=config, logger=logger)
         result = apply_cmd.execute(
@@ -202,19 +213,25 @@ def apply(
             priority=priority,
             dry_run=dry_run,
         )
-        
+
         if result.success:
             if dry_run:
-                click.echo(f"✅ Would create {len(result.pull_requests)} pull requests")
-                click.echo(f"💰 Estimated monthly savings: ${result.estimated_savings:.0f}")
+                click.echo(
+                    f"✅ Would create {len(result.pull_requests)} pull requests"
+                )
+                click.echo(
+                    f"💰 Estimated monthly savings: ${result.estimated_savings:.0f}"
+                )
             else:
-                click.echo(f"✅ Created {len(result.pull_requests)} pull requests")
+                click.echo(
+                    f"✅ Created {len(result.pull_requests)} pull requests"
+                )
                 for pr_url in result.pull_requests:
                     click.echo(f"🔗 {pr_url}")
         else:
             click.echo(f"❌ Apply failed: {result.error}", err=True)
             sys.exit(1)
-            
+
     except Exception as e:
         logger.error(f"Apply command failed: {e}")
         click.echo(f"❌ Error: {e}", err=True)
@@ -227,4 +244,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main() 
+    main()
