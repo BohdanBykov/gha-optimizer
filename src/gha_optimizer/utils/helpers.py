@@ -45,9 +45,7 @@ def safe_execute(
     return decorator
 
 
-def validate_string(
-    value: Any, field_name: str, allow_empty: bool = False
-) -> str:
+def validate_string(value: Any, field_name: str, allow_empty: bool = False) -> str:
     """
     Simple string validation with clear error messages.
 
@@ -63,9 +61,7 @@ def validate_string(
         ValueError: If validation fails
     """
     if not isinstance(value, str):
-        raise ValueError(
-            f"{field_name} must be a string, got {type(value).__name__}"
-        )
+        raise ValueError(f"{field_name} must be a string, got {type(value).__name__}")
 
     if not allow_empty and not value.strip():
         raise ValueError(f"{field_name} cannot be empty")
@@ -73,9 +69,7 @@ def validate_string(
     return value
 
 
-def validate_list(
-    value: Any, field_name: str, allow_empty: bool = True
-) -> list:
+def validate_list(value: Any, field_name: str, allow_empty: bool = True) -> list:
     """
     Simple list validation with clear error messages.
 
@@ -91,9 +85,7 @@ def validate_list(
         ValueError: If validation fails
     """
     if not isinstance(value, list):
-        raise ValueError(
-            f"{field_name} must be a list, got {type(value).__name__}"
-        )
+        raise ValueError(f"{field_name} must be a list, got {type(value).__name__}")
 
     if not allow_empty and not value:
         raise ValueError(f"{field_name} cannot be empty")
@@ -101,9 +93,7 @@ def validate_list(
     return value
 
 
-def safe_get(
-    dictionary: dict, key: str, default: Any = None, expected_type: type = None
-) -> Any:
+def safe_get(dictionary: dict, key: str, default: Any = None, expected_type: type = None) -> Any:
     """
     Safely get value from dictionary with optional type checking.
 
@@ -118,11 +108,7 @@ def safe_get(
     """
     value = dictionary.get(key, default)
 
-    if (
-        expected_type
-        and value is not None
-        and not isinstance(value, expected_type)
-    ):
+    if expected_type and value is not None and not isinstance(value, expected_type):
         logging.warning(
             f"Expected {expected_type.__name__} for key '{key}', got {type(value).__name__}"
         )
@@ -134,9 +120,7 @@ def safe_get(
 class SimpleTimer:
     """Simple context manager for timing operations."""
 
-    def __init__(
-        self, operation_name: str, logger: Optional[logging.Logger] = None
-    ):
+    def __init__(self, operation_name: str, logger: Optional[logging.Logger] = None):
         self.operation_name = operation_name
         self.logger = logger or logging.getLogger(__name__)
         self.start_time = None
@@ -151,9 +135,7 @@ class SimpleTimer:
         import time
 
         duration = time.time() - self.start_time
-        self.logger.debug(
-            f"{self.operation_name} completed in {duration:.2f}s"
-        )
+        self.logger.debug(f"{self.operation_name} completed in {duration:.2f}s")
 
 
 def format_error_message(error: Exception, context: str = "") -> str:
@@ -227,9 +209,7 @@ def calculate_github_actions_cost(
         "macos-latest-large": 0.16,  # $0.16/minute
     }
 
-    cost_per_minute = runner_costs.get(
-        runner_type, 0.008
-    )  # Default to ubuntu-latest
+    cost_per_minute = runner_costs.get(runner_type, 0.008)  # Default to ubuntu-latest
 
     if runs_per_week <= 0:
         # Return per-run cost if no weekly data
@@ -264,9 +244,7 @@ def validate_cost_calculation(
     if runs_per_week <= 0:
         runs_per_week = 50  # Conservative default: ~2 runs per workday
 
-    expected_savings = calculate_github_actions_cost(
-        time_savings, runner_type, runs_per_week
-    )
+    expected_savings = calculate_github_actions_cost(time_savings, runner_type, runs_per_week)
 
     # Handle edge cases
     if expected_savings <= 0:
@@ -293,9 +271,7 @@ def validate_cost_calculation(
     if time_savings > 60:  # Flag savings over 1 hour per run
         is_reasonable = False
 
-    validation_method = (
-        "usage_based" if runs_per_week > 50 else "conservative_default"
-    )
+    validation_method = "usage_based" if runs_per_week > 50 else "conservative_default"
 
     return {
         "is_reasonable": is_reasonable,

@@ -91,21 +91,15 @@ class GitHubClient:
             self.logger.info(f"Collecting workflows for {owner}/{repo}")
 
             # Get list of workflows
-            workflows_url = (
-                f"{self.base_url}/repos/{owner}/{repo}/actions/workflows"
-            )
+            workflows_url = f"{self.base_url}/repos/{owner}/{repo}/actions/workflows"
             response = self.session.get(workflows_url)
 
             if response.status_code == 404:
                 raise GitHubAPIError(f"Repository {owner}/{repo} not found")
             elif response.status_code == 403:
-                raise GitHubAPIError(
-                    "GitHub API rate limit exceeded or insufficient permissions"
-                )
+                raise GitHubAPIError("GitHub API rate limit exceeded or insufficient permissions")
             elif response.status_code != 200:
-                raise GitHubAPIError(
-                    f"GitHub API error: {response.status_code}"
-                )
+                raise GitHubAPIError(f"GitHub API error: {response.status_code}")
 
             workflows_data = response.json()
             workflows = []
@@ -113,17 +107,13 @@ class GitHubClient:
             for workflow_data in workflows_data.get("workflows", []):
                 # Get workflow file content using Contents API
                 file_path = workflow_data["path"]
-                contents_url = (
-                    f"{self.base_url}/repos/{owner}/{repo}/contents/{file_path}"
-                )
+                contents_url = f"{self.base_url}/repos/{owner}/{repo}/contents/{file_path}"
                 file_response = self.session.get(contents_url)
 
                 if file_response.status_code == 200:
                     content_data = file_response.json()
                     # GitHub returns base64 encoded content
-                    file_content = base64.b64decode(
-                        content_data["content"]
-                    ).decode("utf-8")
+                    file_content = base64.b64decode(content_data["content"]).decode("utf-8")
                     workflow = Workflow.from_yaml(
                         file_path=file_path,
                         yaml_content=file_content,
@@ -131,8 +121,7 @@ class GitHubClient:
                     workflows.append(workflow)
                 else:
                     self.logger.warning(
-                        f"Failed to fetch content for {file_path}: "
-                        f"{file_response.status_code}"
+                        f"Failed to fetch content for {file_path}: " f"{file_response.status_code}"
                     )
 
             self.logger.info(f"Collected {len(workflows)} workflows")
@@ -164,13 +153,13 @@ class GitHubClient:
             GitHubAPIError: If API request fails
         """
         try:
-            self.logger.info(
-                f"Collecting workflow runs for {owner}/{repo} (last {days} days)"
-            )
+            self.logger.info(f"Collecting workflow runs for {owner}/{repo} (last {days} days)")
 
             # Build URL based on whether we want all runs or specific workflow
             if workflow_id:
-                runs_url = f"{self.base_url}/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
+                runs_url = (
+                    f"{self.base_url}/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
+                )
             else:
                 runs_url = f"{self.base_url}/repos/{owner}/{repo}/actions/runs"
 
@@ -183,9 +172,7 @@ class GitHubClient:
             response = self.session.get(runs_url, params=params)
 
             if response.status_code != 200:
-                raise GitHubAPIError(
-                    f"GitHub API error: {response.status_code}"
-                )
+                raise GitHubAPIError(f"GitHub API error: {response.status_code}")
 
             runs_data = response.json()
             workflow_runs = []
@@ -234,9 +221,7 @@ class GitHubClient:
             response = self.session.get(repo_url)
 
             if response.status_code != 200:
-                raise GitHubAPIError(
-                    f"GitHub API error: {response.status_code}"
-                )
+                raise GitHubAPIError(f"GitHub API error: {response.status_code}")
 
             repo_data = response.json()
 
@@ -270,14 +255,10 @@ class GitHubClient:
 
             if response.status_code == 200:
                 user_data = response.json()
-                self.logger.info(
-                    f"Connected to GitHub as: {user_data.get('login')}"
-                )
+                self.logger.info(f"Connected to GitHub as: {user_data.get('login')}")
                 return True
             else:
-                self.logger.error(
-                    f"GitHub API connection failed: {response.status_code}"
-                )
+                self.logger.error(f"GitHub API connection failed: {response.status_code}")
                 return False
 
         except requests.RequestException as e:

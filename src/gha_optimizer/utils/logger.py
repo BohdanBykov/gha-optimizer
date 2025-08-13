@@ -5,9 +5,7 @@ import sys
 from typing import Optional
 
 
-def setup_logger(
-    name: str = "gha-optimizer", verbose: bool = False
-) -> logging.Logger:
+def setup_logger(name: str = "gha-optimizer", verbose: bool = False) -> logging.Logger:
     """
     Set up logger with appropriate configuration.
 

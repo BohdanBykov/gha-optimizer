@@ -133,15 +133,9 @@ def scan(
 
         if result.success:
             click.echo(f"✅ Analysis completed!")
-            click.echo(
-                f"📈 Found {len(result.recommendations)} optimization opportunities"
-            )
-            click.echo(
-                f"💰 Potential monthly savings: ${result.estimated_savings:.0f}"
-            )
-            click.echo(
-                f"⏱️  Potential time savings: {result.time_savings:.1f} minutes per run"
-            )
+            click.echo(f"📈 Found {len(result.recommendations)} optimization opportunities")
+            click.echo(f"💰 Potential monthly savings: ${result.estimated_savings:.0f}")
+            click.echo(f"⏱️  Potential time savings: {result.time_savings:.1f} minutes per run")
 
             if output:
                 click.echo(f"📄 Detailed report saved to: {output}")
@@ -216,16 +210,10 @@ def apply(
 
         if result.success:
             if dry_run:
-                click.echo(
-                    f"✅ Would create {len(result.pull_requests)} pull requests"
-                )
-                click.echo(
-                    f"💰 Estimated monthly savings: ${result.estimated_savings:.0f}"
-                )
+                click.echo(f"✅ Would create {len(result.pull_requests)} pull requests")
+                click.echo(f"💰 Estimated monthly savings: ${result.estimated_savings:.0f}")
             else:
-                click.echo(
-                    f"✅ Created {len(result.pull_requests)} pull requests"
-                )
+                click.echo(f"✅ Created {len(result.pull_requests)} pull requests")
                 for pr_url in result.pull_requests:
                     click.echo(f"🔗 {pr_url}")
         else:

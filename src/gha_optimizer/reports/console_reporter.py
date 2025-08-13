@@ -112,9 +112,7 @@ class ConsoleReporter:
             else 0
         )
         activity_level = (
-            "🔥 High"
-            if runs_per_week > 20
-            else "📊 Medium" if runs_per_week > 5 else "📉 Low"
+            "🔥 High" if runs_per_week > 20 else "📊 Medium" if runs_per_week > 5 else "📉 Low"
         )
 
         # Build breakdown
@@ -143,9 +141,7 @@ class ConsoleReporter:
 
         return self.template.render(**template_data)
 
-    def _build_breakdown_lines(
-        self, recommendations: List[Dict[str, Any]]
-    ) -> List[str]:
+    def _build_breakdown_lines(self, recommendations: List[Dict[str, Any]]) -> List[str]:
         """Build optimization breakdown lines."""
         type_counts = {}
         type_savings = {}
@@ -156,9 +152,7 @@ class ConsoleReporter:
 
             savings_value = float(rec.get("monthly_cost_savings", 0))
 
-            type_savings[opt_type] = (
-                type_savings.get(opt_type, 0) + savings_value
-            )
+            type_savings[opt_type] = type_savings.get(opt_type, 0) + savings_value
 
         lines = []
         for opt_type in sorted(type_counts.keys()):
@@ -166,9 +160,7 @@ class ConsoleReporter:
             count = type_counts[opt_type]
             savings = type_savings[opt_type]
             type_name = opt_type.replace("-", " ").title()
-            lines.append(
-                f"{emoji} {type_name}: {count} optimization(s) → ${savings:.0f}/month"
-            )
+            lines.append(f"{emoji} {type_name}: {count} optimization(s) → ${savings:.0f}/month")
 
         return lines
 
@@ -191,16 +183,12 @@ class ConsoleReporter:
                 section_recs = []
                 for i, rec in enumerate(recs, 1):
                     impact = f"{rec.get('impact_time_minutes', 0):.1f} min/run saved"
-                    monthly_savings = (
-                        f"${rec.get('monthly_cost_savings', 0):.0f}"
-                    )
+                    monthly_savings = f"${rec.get('monthly_cost_savings', 0):.0f}"
 
                     section_recs.append(
                         {
                             "index": i,
-                            "type_emoji": self.TYPE_EMOJIS.get(
-                                rec.get("type", "unknown"), "📋"
-                            ),
+                            "type_emoji": self.TYPE_EMOJIS.get(rec.get("type", "unknown"), "📋"),
                             "title": rec["title"],
                             "workflow": rec.get(
                                 "workflow_file",

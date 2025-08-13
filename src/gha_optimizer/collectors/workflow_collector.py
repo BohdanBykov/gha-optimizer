@@ -10,9 +10,7 @@ from .github_client import GitHubAPIError, GitHubClient
 class WorkflowCollector:
     """Collector for aggregating workflow data from GitHub API."""
 
-    def __init__(
-        self, config: Config, logger: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, config: Config, logger: Optional[logging.Logger] = None) -> None:
         """
         Initialize workflow collector.
 
@@ -52,14 +50,10 @@ class WorkflowCollector:
             workflows = github_client.collect_workflows(owner, repo)
 
             # Collect workflow runs
-            workflow_runs = github_client.collect_run_history(
-                owner, repo, days=max_history_days
-            )
+            workflow_runs = github_client.collect_run_history(owner, repo, days=max_history_days)
 
             # Collect repository metadata
-            repo_metadata = github_client.collect_repository_metadata(
-                owner, repo
-            )
+            repo_metadata = github_client.collect_repository_metadata(owner, repo)
 
             self.logger.info(
                 f"Successfully collected data: {len(workflows)} workflows, {len(workflow_runs)} runs"
@@ -79,16 +73,10 @@ class WorkflowCollector:
             self.logger.error(f"GitHub API error: {e}")
             raise  # Re-raise the exception instead of falling back
         except Exception as e:
-            self.logger.error(
-                f"Unexpected error collecting workflow data: {e}"
-            )
-            raise GitHubAPIError(
-                f"Failed to collect workflow data: {e}"
-            ) from e
+            self.logger.error(f"Unexpected error collecting workflow data: {e}")
+            raise GitHubAPIError(f"Failed to collect workflow data: {e}") from e
 
-    def get_raw_workflows_for_ai(
-        self, owner: str, repo: str, token: str
-    ) -> Dict[str, str]:
+    def get_raw_workflows_for_ai(self, owner: str, repo: str, token: str) -> Dict[str, str]:
         """
         Get raw workflow YAML content for AI analysis.
 
@@ -111,9 +99,7 @@ class WorkflowCollector:
             workflows = github_client.collect_workflows(owner, repo)
 
             # Return mapping of file path to raw YAML content
-            return {
-                workflow.file_path: workflow.content for workflow in workflows
-            }
+            return {workflow.file_path: workflow.content for workflow in workflows}
 
         except GitHubAPIError:
             raise

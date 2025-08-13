@@ -51,9 +51,7 @@ class ApplyCommand:
             ApplyResult with success status, created PRs, and estimated savings
         """
         try:
-            self.logger.info(
-                f"Starting optimization application for repository: {repository}"
-            )
+            self.logger.info(f"Starting optimization application for repository: {repository}")
 
             if dry_run:
                 self.logger.info("Dry run mode: No PRs will be created")
@@ -118,21 +116,13 @@ class ApplyCommand:
                 optimizations = available_optimizations.get(priority, [])
 
             if not optimizations:
-                self.logger.info(
-                    "No optimizations found for the specified priority level"
-                )
-                return ApplyResult(
-                    success=True, pull_requests=[], estimated_savings=0.0
-                )
+                self.logger.info("No optimizations found for the specified priority level")
+                return ApplyResult(success=True, pull_requests=[], estimated_savings=0.0)
 
-            estimated_savings = (
-                len(optimizations) * 50.0
-            )  # Placeholder calculation
+            estimated_savings = len(optimizations) * 50.0  # Placeholder calculation
 
             if dry_run:
-                self.logger.info(
-                    f"Would create {len(optimizations)} pull requests"
-                )
+                self.logger.info(f"Would create {len(optimizations)} pull requests")
                 for opt in optimizations:
                     self.logger.info(f"  - {opt}")
 
@@ -156,12 +146,8 @@ class ApplyCommand:
                 created_prs.append(pr_url)
                 self.logger.info(f"Created PR for {optimization}: {pr_url}")
 
-            self.logger.info(
-                f"Apply completed. Created {len(created_prs)} pull requests"
-            )
-            self.logger.info(
-                f"Estimated monthly savings: ${estimated_savings:.0f}"
-            )
+            self.logger.info(f"Apply completed. Created {len(created_prs)} pull requests")
+            self.logger.info(f"Estimated monthly savings: ${estimated_savings:.0f}")
 
             return ApplyResult(
                 success=True,

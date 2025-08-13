@@ -17,9 +17,7 @@ from ..utils.helpers import (
 class AIWorkflowAnalyzer:
     """AI-powered analyzer for GitHub Actions workflows using predefined optimization patterns."""
 
-    def __init__(
-        self, config: Config, logger: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, config: Config, logger: Optional[logging.Logger] = None) -> None:
         """Initialize AI analyzer."""
         self.config = config
         self.logger = logger or logging.getLogger(__name__)
@@ -62,9 +60,7 @@ class AIWorkflowAnalyzer:
         ai_response = self._call_ai_api(prompt)
 
         # Convert AI response to existing recommendation format
-        recommendations = self._parse_ai_recommendations(
-            ai_response, repository_stats, workflows
-        )
+        recommendations = self._parse_ai_recommendations(ai_response, repository_stats, workflows)
 
         self.logger.info(
             f"AI analysis completed. Found {len(recommendations)} optimization opportunities"
@@ -84,9 +80,7 @@ class AIWorkflowAnalyzer:
         Returns:
             Complete prompt string that would be sent to AI
         """
-        self.logger.info(
-            f"Generating prompt for {len(workflows)} workflows (debug mode)"
-        )
+        self.logger.info(f"Generating prompt for {len(workflows)} workflows (debug mode)")
 
         # Apply same demo limitation as in regular analysis
         if len(workflows) > 3:
@@ -99,9 +93,7 @@ class AIWorkflowAnalyzer:
         # Use the same prompt building logic as regular analysis
         prompt = self._build_multi_workflow_prompt(workflows, repository_stats)
 
-        self.logger.info(
-            f"Prompt generated successfully: {len(prompt)} characters"
-        )
+        self.logger.info(f"Prompt generated successfully: {len(prompt)} characters")
         return prompt
 
     def _build_multi_workflow_prompt(
@@ -114,18 +106,14 @@ class AIWorkflowAnalyzer:
 
         # Calculate estimated runs per week for impact calculation
         runs_per_week = (
-            repository_stats.get("runs_count", 0)
-            * 7
-            / repository_stats.get("analysis_days", 30)
+            repository_stats.get("runs_count", 0) * 7 / repository_stats.get("analysis_days", 30)
         )
 
         # Build workflows section with IDs
         workflows_section = []
         workflow_ids = {}
 
-        for idx, (workflow_path, workflow_content) in enumerate(
-            workflows.items(), 1
-        ):
+        for idx, (workflow_path, workflow_content) in enumerate(workflows.items(), 1):
             workflow_id = f"WF{idx:02d}"
             workflow_ids[workflow_id] = workflow_path
             numbered_yaml = self._add_line_numbers_to_yaml(workflow_content)
@@ -197,9 +185,7 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
 
     def _call_ai_api(self, prompt: str) -> List[Dict[str, Any]]:
         """Call AI API with real implementation for OpenAI or Anthropic."""
-        self.logger.debug(
-            f"Calling {self.config.ai_provider} API with {self.config.ai_model}"
-        )
+        self.logger.debug(f"Calling {self.config.ai_provider} API with {self.config.ai_model}")
 
         try:
             if self.config.ai_provider == "openai":
@@ -207,9 +193,7 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
             elif self.config.ai_provider == "anthropic":
                 return self._call_anthropic_api(prompt)
             else:
-                raise ValueError(
-                    f"Unsupported AI provider: {self.config.ai_provider}"
-                )
+                raise ValueError(f"Unsupported AI provider: {self.config.ai_provider}")
 
         except Exception as e:
             self.logger.error(f"AI API call failed: {e}")
@@ -244,18 +228,14 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
                 )
 
                 content = response.choices[0].message.content.strip()
-                self.logger.debug(
-                    f"OpenAI response length: {len(content)} characters"
-                )
+                self.logger.debug(f"OpenAI response length: {len(content)} characters")
 
                 # Parse JSON response
                 # Extract JSON from markdown code blocks if present
                 json_content = self._extract_json_from_response(content)
                 recommendations = json.loads(json_content)
                 if not isinstance(recommendations, list):
-                    self.logger.warning(
-                        "OpenAI returned non-list response, wrapping in list"
-                    )
+                    self.logger.warning("OpenAI returned non-list response, wrapping in list")
                     recommendations = [recommendations]
 
                 return recommendations
@@ -265,9 +245,7 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
                 raise  # Don't retry JSON parse errors
             except Exception as e:
                 if attempt == max_retries - 1:  # Last attempt
-                    self.logger.error(
-                        f"OpenAI API error after {max_retries} attempts: {e}"
-                    )
+                    self.logger.error(f"OpenAI API error after {max_retries} attempts: {e}")
                     raise
                 else:
                     delay = base_delay * (2**attempt)  # Exponential backoff
@@ -298,12 +276,8 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
                 )
 
                 content = response.content[0].text.strip()
-                self.logger.debug(
-                    f"Anthropic response length: {len(content)} characters"
-                )
-                self.logger.debug(
-                    f"Anthropic response content: {repr(content[:500])}"
-                )
+                self.logger.debug(f"Anthropic response length: {len(content)} characters")
+                self.logger.debug(f"Anthropic response content: {repr(content[:500])}")
 
                 # Parse JSON response
                 if not content:
@@ -314,23 +288,17 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
                 json_content = self._extract_json_from_response(content)
                 recommendations = json.loads(json_content)
                 if not isinstance(recommendations, list):
-                    self.logger.warning(
-                        "Anthropic returned non-list response, wrapping in list"
-                    )
+                    self.logger.warning("Anthropic returned non-list response, wrapping in list")
                     recommendations = [recommendations]
 
                 return recommendations
 
             except json.JSONDecodeError as e:
-                self.logger.error(
-                    f"Failed to parse Anthropic JSON response: {e}"
-                )
+                self.logger.error(f"Failed to parse Anthropic JSON response: {e}")
                 raise  # Don't retry JSON parse errors
             except Exception as e:
                 if attempt == max_retries - 1:  # Last attempt
-                    self.logger.error(
-                        f"Anthropic API error after {max_retries} attempts: {e}"
-                    )
+                    self.logger.error(f"Anthropic API error after {max_retries} attempts: {e}")
                     raise
                 else:
                     delay = base_delay * (2**attempt)  # Exponential backoff
@@ -341,9 +309,7 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
 
     def _fallback_pattern_analysis(self, prompt: str) -> List[Dict[str, Any]]:
         """Fallback pattern-based analysis when AI API fails."""
-        self.logger.warning(
-            "Using fallback pattern analysis due to AI API failure"
-        )
+        self.logger.warning("Using fallback pattern analysis due to AI API failure")
 
         # Extract workflows from prompt
         workflow_pattern = r"FILE: (.+?)\n```yaml\n(.*?)\n```"
@@ -353,10 +319,7 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
 
         for file_path, workflow_content in workflows:
             # Simple pattern detection
-            if (
-                "npm ci" in workflow_content
-                and "actions/cache" not in workflow_content
-            ):
+            if "npm ci" in workflow_content and "actions/cache" not in workflow_content:
                 recommendations.append(
                     {
                         "title": "Add Node.js Dependency Caching",
@@ -374,10 +337,7 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
                     }
                 )
 
-            if (
-                "pip install" in workflow_content
-                and "actions/cache" not in workflow_content
-            ):
+            if "pip install" in workflow_content and "actions/cache" not in workflow_content:
                 recommendations.append(
                     {
                         "title": "Add Python Dependency Caching",
@@ -479,9 +439,7 @@ ANALYSIS INSTRUCTIONS:
         """Convert AI response to standardized recommendation format with cost validation."""
         processed_recommendations = []
         runs_per_week = (
-            repository_stats.get("runs_count", 0)
-            * 7
-            / repository_stats.get("analysis_days", 30)
+            repository_stats.get("runs_count", 0) * 7 / repository_stats.get("analysis_days", 30)
             if repository_stats.get("analysis_days", 0) > 0
             else 0
         )
@@ -492,13 +450,9 @@ ANALYSIS INSTRUCTIONS:
             f"MANDATORY cost validation starting - {len(ai_response)} recommendations to validate"
         )
         if runs_per_week > 0:
-            self.logger.debug(
-                f"Using actual usage data: {runs_per_week:.1f} runs/week"
-            )
+            self.logger.debug(f"Using actual usage data: {runs_per_week:.1f} runs/week")
         else:
-            self.logger.debug(
-                "Using conservative default: 50 runs/week for validation"
-            )
+            self.logger.debug("Using conservative default: 50 runs/week for validation")
 
         for rec in ai_response:
             # Ensure all required fields are present
@@ -506,22 +460,14 @@ ANALYSIS INSTRUCTIONS:
                 "title": rec.get("title", "Unknown Optimization"),
                 "type": rec.get("type", "unknown"),
                 "priority": rec.get("priority", "medium"),
-                "workflow_file": rec.get(
-                    "workflow_file", rec.get("workflow", "unknown")
-                ),
+                "workflow_file": rec.get("workflow_file", rec.get("workflow", "unknown")),
                 "job_name": rec.get("job_name", "unknown"),
                 "line_number": rec.get("line_number", ""),
                 "description": rec.get("description", ""),
-                "impact_time_minutes": float(
-                    rec.get("impact_time_minutes", 0)
-                ),
-                "monthly_cost_savings": float(
-                    rec.get("monthly_cost_savings", 0)
-                ),
+                "impact_time_minutes": float(rec.get("impact_time_minutes", 0)),
+                "monthly_cost_savings": float(rec.get("monthly_cost_savings", 0)),
                 "confidence_score": float(rec.get("confidence_score", 0.5)),
-                "implementation_effort": rec.get(
-                    "implementation_effort", "medium"
-                ),
+                "implementation_effort": rec.get("implementation_effort", "medium"),
                 "implementation": rec.get("implementation", ""),
                 "code_example": rec.get("code_example", ""),
             }
@@ -530,9 +476,7 @@ ANALYSIS INSTRUCTIONS:
             validation = validate_cost_calculation(
                 processed_rec["impact_time_minutes"],
                 processed_rec["monthly_cost_savings"],
-                (
-                    runs_per_week if runs_per_week > 0 else 50
-                ),  # Use conservative default if no data
+                (runs_per_week if runs_per_week > 0 else 50),  # Use conservative default if no data
             )
 
             validation_stats["total_validated"] += 1
@@ -543,15 +487,11 @@ ANALYSIS INSTRUCTIONS:
                     f"Cost calculation adjusted for '{processed_rec['title']}': {validation['recommendation']}"
                 )
                 # Use the more conservative expected calculation
-                processed_rec["monthly_cost_savings"] = validation[
-                    "expected_savings"
-                ]
+                processed_rec["monthly_cost_savings"] = validation["expected_savings"]
                 if "Cost adjusted:" not in processed_rec["description"]:
                     processed_rec[
                         "description"
-                    ] += (
-                        f" (Cost calculation adjusted based on usage patterns)"
-                    )
+                    ] += f" (Cost calculation adjusted based on usage patterns)"
             else:
                 validation_stats["passed"] += 1
                 self.logger.debug(
@@ -597,9 +537,7 @@ ANALYSIS INSTRUCTIONS:
         if matches:
             # Use the first JSON block found
             json_content = matches[0].strip()
-            self.logger.debug(
-                f"Extracted JSON from code block: {len(json_content)} chars"
-            )
+            self.logger.debug(f"Extracted JSON from code block: {len(json_content)} chars")
             return json_content
 
         # Look for array starting with [ and ending with ]
@@ -608,9 +546,7 @@ ANALYSIS INSTRUCTIONS:
 
         if array_matches:
             json_content = array_matches[0].strip()
-            self.logger.debug(
-                f"Extracted JSON array from response: {len(json_content)} chars"
-            )
+            self.logger.debug(f"Extracted JSON array from response: {len(json_content)} chars")
             return json_content
 
         # If no patterns found, return the original content

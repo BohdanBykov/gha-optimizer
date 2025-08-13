@@ -102,28 +102,20 @@ class ScanCommand:
             )
 
             # Get raw workflows for AI analysis
-            raw_workflows = workflow_collector.get_raw_workflows_for_ai(
-                owner, repo, token
-            )
+            raw_workflows = workflow_collector.get_raw_workflows_for_ai(owner, repo, token)
 
             # Run AI analysis on raw workflows or save prompt to file
             ai_analyzer = AIWorkflowAnalyzer(self.config, self.logger)
 
             # Debug mode: Save prompt to file without making API call
             if output_prompt_file:
-                self.logger.info(
-                    f"Debug mode: Saving AI prompt to {output_prompt_file}"
-                )
-                prompt_content = ai_analyzer.generate_prompt_only(
-                    raw_workflows, workflow_data
-                )
+                self.logger.info(f"Debug mode: Saving AI prompt to {output_prompt_file}")
+                prompt_content = ai_analyzer.generate_prompt_only(raw_workflows, workflow_data)
 
                 try:
                     with open(output_prompt_file, "w", encoding="utf-8") as f:
                         f.write(prompt_content)
-                    self.logger.info(
-                        f"Prompt saved successfully to {output_prompt_file}"
-                    )
+                    self.logger.info(f"Prompt saved successfully to {output_prompt_file}")
 
                     return ScanResult(
                         success=True,
@@ -141,15 +133,11 @@ class ScanCommand:
                         error=f"Failed to save prompt to file: {e}",
                     )
 
-            ai_recommendations = ai_analyzer.analyze_workflows(
-                raw_workflows, workflow_data
-            )
+            ai_recommendations = ai_analyzer.analyze_workflows(raw_workflows, workflow_data)
 
             # Calculate impact metrics from AI recommendations
-            estimated_savings, time_savings = (
-                self._calculate_impact_from_ai_recommendations(
-                    ai_recommendations
-                )
+            estimated_savings, time_savings = self._calculate_impact_from_ai_recommendations(
+                ai_recommendations
             )
 
             recommendations = ai_recommendations
@@ -157,12 +145,8 @@ class ScanCommand:
             self.logger.info(
                 f"Analysis completed. Found {len(recommendations)} optimization opportunities"
             )
-            self.logger.info(
-                f"Estimated monthly savings: ${estimated_savings:.0f}"
-            )
-            self.logger.info(
-                f"Estimated time savings: {time_savings:.1f} minutes per run"
-            )
+            self.logger.info(f"Estimated monthly savings: ${estimated_savings:.0f}")
+            self.logger.info(f"Estimated time savings: {time_savings:.1f} minutes per run")
 
             # Generate and print console report
             reporter = ConsoleReporter(self.config)
@@ -177,9 +161,7 @@ class ScanCommand:
 
             # TODO: Generate detailed report if output file specified
             if output_file:
-                self.logger.info(
-                    f"Generating {output_format} report: {output_file}"
-                )
+                self.logger.info(f"Generating {output_format} report: {output_file}")
                 # Placeholder: would generate actual report here
 
             return ScanResult(

@@ -16,16 +16,12 @@ class Config:
     @property
     def github_token(self) -> Optional[str]:
         """Get GitHub token from config or environment."""
-        return self._config.get("github", {}).get("token") or os.getenv(
-            "GITHUB_TOKEN"
-        )
+        return self._config.get("github", {}).get("token") or os.getenv("GITHUB_TOKEN")
 
     @property
     def github_api_url(self) -> str:
         """Get GitHub API URL."""
-        return self._config.get("github", {}).get(
-            "api_url", "https://api.github.com"
-        )
+        return self._config.get("github", {}).get("api_url", "https://api.github.com")
 
     @property
     def ai_provider(self) -> str:
@@ -66,9 +62,7 @@ class Config:
     @property
     def confidence_threshold(self) -> float:
         """Get confidence threshold for recommendations."""
-        return self._config.get("analysis", {}).get(
-            "confidence_threshold", 0.7
-        )
+        return self._config.get("analysis", {}).get("confidence_threshold", 0.7)
 
     @property
     def parallel_requests(self) -> int:
@@ -83,16 +77,12 @@ class Config:
     @property
     def include_code_examples(self) -> bool:
         """Whether to include code examples in output."""
-        return self._config.get("output", {}).get(
-            "include_code_examples", True
-        )
+        return self._config.get("output", {}).get("include_code_examples", True)
 
     @property
     def generate_pr_descriptions(self) -> bool:
         """Whether to generate PR descriptions."""
-        return self._config.get("output", {}).get(
-            "generate_pr_descriptions", True
-        )
+        return self._config.get("output", {}).get("generate_pr_descriptions", True)
 
 
 def load_config(config_path: Optional[Path] = None) -> Config:
@@ -114,9 +104,7 @@ def load_config(config_path: Optional[Path] = None) -> Config:
     if config_path:
         # Load from specified file
         if not config_path.exists():
-            raise FileNotFoundError(
-                f"Configuration file not found: {config_path}"
-            )
+            raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
         with open(config_path, "r", encoding="utf-8") as f:
             config_dict = yaml.safe_load(f) or {}
@@ -157,9 +145,7 @@ def load_config(config_path: Optional[Path] = None) -> Config:
     return Config(merged_config)
 
 
-def _deep_merge(
-    default: Dict[str, Any], override: Dict[str, Any]
-) -> Dict[str, Any]:
+def _deep_merge(default: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
     """
     Deep merge two dictionaries.
 
@@ -173,11 +159,7 @@ def _deep_merge(
     result = default.copy()
 
     for key, value in override.items():
-        if (
-            key in result
-            and isinstance(result[key], dict)
-            and isinstance(value, dict)
-        ):
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             result[key] = _deep_merge(result[key], value)
         else:
             result[key] = value

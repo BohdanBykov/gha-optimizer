@@ -99,11 +99,7 @@ class Workflow:
                         needs=(
                             job_config.get("needs", [])
                             if isinstance(job_config.get("needs"), list)
-                            else (
-                                [job_config.get("needs")]
-                                if job_config.get("needs")
-                                else []
-                            )
+                            else ([job_config.get("needs")] if job_config.get("needs") else [])
                         ),
                         if_condition=job_config.get("if"),
                         strategy=job_config.get("strategy"),
@@ -173,9 +169,8 @@ class Workflow:
         for job in self.jobs:
             for step in job.steps:
                 run_command = step.get("run", "")
-                if (
-                    "docker build" in run_command
-                    or "docker/build-push-action" in str(step.get("uses", ""))
+                if "docker build" in run_command or "docker/build-push-action" in str(
+                    step.get("uses", "")
                 ):
                     return True
         return False
@@ -258,9 +253,7 @@ class AnalysisContext:
     @property
     def average_run_duration(self) -> Optional[timedelta]:
         """Get average duration of workflow runs."""
-        durations = [
-            run.duration for run in self.workflow_runs if run.duration
-        ]
+        durations = [run.duration for run in self.workflow_runs if run.duration]
         if not durations:
             return None
 
@@ -274,13 +267,9 @@ class AnalysisContext:
         if not self.workflow_runs:
             return 0.0
 
-        successful_runs = sum(
-            1 for run in self.workflow_runs if run.was_successful
-        )
+        successful_runs = sum(1 for run in self.workflow_runs if run.was_successful)
         return successful_runs / len(self.workflow_runs)
 
     def get_runs_for_workflow(self, workflow_id: str) -> List[WorkflowRun]:
         """Get all runs for a specific workflow."""
-        return [
-            run for run in self.workflow_runs if run.workflow_id == workflow_id
-        ]
+        return [run for run in self.workflow_runs if run.workflow_id == workflow_id]
