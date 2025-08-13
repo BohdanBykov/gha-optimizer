@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gha-optimizer"
-version = "0.1.0"
+version = "1.0.0"
 description = "AI-Powered GitHub Actions Workflow Optimization Tool"
 readme = "README.md"
 license = {text = "MIT"}
@@ -111,7 +111,7 @@ ensure_newline_before_comments = true
 
 # mypy configuration
 [tool.mypy]
-python_version = "3.9"
+python_version = "1.0.0"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -134,7 +134,7 @@ ignore_missing_imports = true
 
 # pytest configuration
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "1.0.0"
 addopts = "-ra -q --strict-markers --strict-config"
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
