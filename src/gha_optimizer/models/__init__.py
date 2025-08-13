@@ -1,1 +1,1 @@
-"""Data models for GHA-Optimizer.""" 
+"""Data models for GHA-Optimizer."""

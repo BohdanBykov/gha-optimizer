@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 100
+per-file-ignores = 
+    src/gha_optimizer/analyzers/ai_analyzer.py:E501
+exclude = 
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .venv,
+    venv,
+    .tox,
+    .eggs,
+    *.egg-info

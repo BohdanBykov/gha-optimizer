@@ -46,6 +46,9 @@ gha-optimizer scan microsoft/vscode
 
 # Or analyze with more recent data
 gha-optimizer scan microsoft/vscode --max-history-days 7
+
+# Debug: Save AI prompt to file without making API call
+gha-optimizer scan microsoft/vscode --output-prompt-file debug_prompt.txt
 ```
 
 ### 4. Get Your Results
@@ -82,6 +85,30 @@ python test_cli.py
 ```
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed development guidelines.
+
+## 🐛 Debugging Features
+
+For development and troubleshooting, you can use these debugging options:
+
+### Save AI Prompt to File
+When you want to see exactly what prompt is being sent to the AI without making an API call:
+
+```bash
+# Generate and save the AI prompt to a file
+gha-optimizer scan microsoft/vscode --output-prompt-file debug_prompt.txt
+```
+
+This is useful for:
+- **Debugging AI responses**: See exactly what context the AI receives
+- **Prompt optimization**: Analyze and improve the prompts we send
+- **Cost estimation**: Preview what will be sent before using API credits  
+- **Offline analysis**: Generate prompts to analyze later
+
+The generated file contains the complete prompt with:
+- Repository context and statistics
+- All workflow YAML files with line numbers
+- Optimization pattern guidelines
+- Structured output requirements
 
 ## 🔧 Configuration
 

@@ -1,1 +1,1 @@
-"""Command implementations for GHA-Optimizer CLI.""" 
+"""Command implementations for GHA-Optimizer CLI."""
