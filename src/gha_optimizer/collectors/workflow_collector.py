@@ -22,7 +22,12 @@ class WorkflowCollector:
         self.logger = logger or logging.getLogger(__name__)
 
     def collect_workflow_data(
-        self, owner: str, repo: str, token: str, max_history_days: int, workflow_files: Optional[List[str]] = None
+        self,
+        owner: str,
+        repo: str,
+        token: str,
+        max_history_days: int,
+        workflow_files: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Collect comprehensive workflow data from GitHub API.
@@ -77,7 +82,9 @@ class WorkflowCollector:
             self.logger.error(f"Unexpected error collecting workflow data: {e}")
             raise GitHubAPIError(f"Failed to collect workflow data: {e}") from e
 
-    def get_raw_workflows_for_ai(self, owner: str, repo: str, token: str, workflow_files: Optional[List[str]] = None) -> Dict[str, str]:
+    def get_raw_workflows_for_ai(
+        self, owner: str, repo: str, token: str, workflow_files: Optional[List[str]] = None
+    ) -> Dict[str, str]:
         """
         Get raw workflow YAML content for AI analysis.
 

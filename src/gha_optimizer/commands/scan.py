@@ -111,7 +111,9 @@ class ScanCommand:
             )
 
             # Get raw workflows for AI analysis
-            raw_workflows = workflow_collector.get_raw_workflows_for_ai(owner, repo, token, workflow_files)
+            raw_workflows = workflow_collector.get_raw_workflows_for_ai(
+                owner, repo, token, workflow_files
+            )
 
             # Run AI analysis on raw workflows or save prompt to file
             ai_analyzer = AIWorkflowAnalyzer(self.config, self.logger)
