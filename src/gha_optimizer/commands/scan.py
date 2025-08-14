@@ -43,6 +43,7 @@ class ScanCommand:
         output_file: Optional[Path] = None,
         output_format: str = "markdown",
         max_history_days: int = 30,
+        workflow_files: Optional[List[str]] = None,
         output_prompt_file: Optional[Path] = None,
     ) -> ScanResult:
         """
@@ -54,6 +55,7 @@ class ScanCommand:
             output_file: Output file for detailed report
             output_format: Output format (markdown, html, json)
             max_history_days: Maximum days of workflow history to analyze
+            workflow_files: List of specific workflow files to analyze (optional)
             output_prompt_file: Debug option to save AI prompt to file without API call
 
         Returns:
@@ -105,11 +107,13 @@ class ScanCommand:
             # Collect real workflow data from GitHub
             workflow_collector = WorkflowCollector(self.config, self.logger)
             workflow_data = workflow_collector.collect_workflow_data(
-                owner, repo, token, max_history_days
+                owner, repo, token, max_history_days, workflow_files
             )
 
             # Get raw workflows for AI analysis
-            raw_workflows = workflow_collector.get_raw_workflows_for_ai(owner, repo, token)
+            raw_workflows = workflow_collector.get_raw_workflows_for_ai(
+                owner, repo, token, workflow_files
+            )
 
             # Run AI analysis on raw workflows or save prompt to file
             ai_analyzer = AIWorkflowAnalyzer(self.config, self.logger)

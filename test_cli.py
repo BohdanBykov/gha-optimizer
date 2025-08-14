@@ -48,11 +48,27 @@ def test_cli():
     except Exception as e:
         print(f"❌ Scan help command failed: {e}")
     
+    # Test workflow filtering flag availability
+    print("\n4. Testing workflow filtering flag:")
+    try:
+        import click.testing
+        runner = click.testing.CliRunner()
+        result = runner.invoke(cli, ["scan", "--help"])
+        
+        if result.exit_code == 0 and "--workflows" in result.output:
+            print("✅ Workflow filtering flag is present in help output")
+        else:
+            print("❌ Workflow filtering flag not found in help output")
+            print(f"Help output: {result.output}")
+    except Exception as e:
+        print(f"❌ Workflow filtering flag test failed: {e}")
+    
     print("\n🎉 CLI integration tests completed!")
     print("\nCore CLI functionality verified:")
     print("✓ Help system")
     print("✓ Version information") 
     print("✓ Scan command help")
+    print("✓ Workflow filtering flag")
     print("✓ CLI structure and imports")
     print("✓ Basic command framework")
 

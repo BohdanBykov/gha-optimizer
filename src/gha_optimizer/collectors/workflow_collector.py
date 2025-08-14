@@ -1,7 +1,7 @@
 """Workflow data collector for aggregating GitHub workflow information."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from ..utils.config import Config
 from .github_client import GitHubAPIError, GitHubClient
@@ -22,7 +22,12 @@ class WorkflowCollector:
         self.logger = logger or logging.getLogger(__name__)
 
     def collect_workflow_data(
-        self, owner: str, repo: str, token: str, max_history_days: int
+        self,
+        owner: str,
+        repo: str,
+        token: str,
+        max_history_days: int,
+        workflow_files: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Collect comprehensive workflow data from GitHub API.
@@ -47,7 +52,7 @@ class WorkflowCollector:
                 )
 
             # Collect workflows
-            workflows = github_client.collect_workflows(owner, repo)
+            workflows = github_client.collect_workflows(owner, repo, workflow_files)
 
             # Collect workflow runs
             workflow_runs = github_client.collect_run_history(owner, repo, days=max_history_days)
@@ -77,7 +82,9 @@ class WorkflowCollector:
             self.logger.error(f"Unexpected error collecting workflow data: {e}")
             raise GitHubAPIError(f"Failed to collect workflow data: {e}") from e
 
-    def get_raw_workflows_for_ai(self, owner: str, repo: str, token: str) -> Dict[str, str]:
+    def get_raw_workflows_for_ai(
+        self, owner: str, repo: str, token: str, workflow_files: Optional[List[str]] = None
+    ) -> Dict[str, str]:
         """
         Get raw workflow YAML content for AI analysis.
 
@@ -97,7 +104,7 @@ class WorkflowCollector:
                     "GitHub API connection test failed - check your token and network connectivity"
                 )
 
-            workflows = github_client.collect_workflows(owner, repo)
+            workflows = github_client.collect_workflows(owner, repo, workflow_files)
 
             # Return mapping of file path to raw YAML content
             return {workflow.file_path: workflow.content for workflow in workflows}

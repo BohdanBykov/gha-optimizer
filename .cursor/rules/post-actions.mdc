@@ -5,9 +5,9 @@ alwaysApply: true
 ---
 
 MANDATORY VALIDATION SEQUENCE:
+- before running any python tools make sure you use venv
 
 ALWAYS RUN IF MAKING CODE CHANGES:
-- make sure python venv is used
 - python test_cli.py                  
 - black src/
 - isort src/
