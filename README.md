@@ -50,8 +50,11 @@ gha-optimizer scan microsoft/vscode --max-history-days 7
 # Analyze specific workflow files only
 gha-optimizer scan microsoft/vscode -w \'ci.yml\' -w \'test.yml\'
 
-# Debug: Save AI prompt to file without making API call
+# Debug: Save AI prompt to file (doesn't block analysis)
 gha-optimizer scan microsoft/vscode --output-prompt-file debug_prompt.txt
+
+# Debug: Save AI response to file before report generation
+gha-optimizer scan microsoft/vscode --output-ai-response debug_response.json
 ```
 
 ### 4. Get Your Results
@@ -93,8 +96,12 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed development guidelines.
 
 For development and troubleshooting, you can use these debugging options:
 
-### Save AI Prompt to File
-When you want to see exactly what prompt is being sent to the AI without making an API call:
+### Debug Options
+
+For development and troubleshooting, you can use these debugging options:
+
+#### Save AI Prompt to File
+When you want to see exactly what prompt is being sent to the AI:
 
 ```bash
 # Generate and save the AI prompt to a file
@@ -112,6 +119,22 @@ The generated file contains the complete prompt with:
 - All workflow YAML files with line numbers
 - Optimization pattern guidelines
 - Structured output requirements
+
+#### Save AI Response to File
+When you want to see the raw AI response before it's processed into recommendations:
+
+```bash
+# Save AI response to file before report generation
+gha-optimizer scan microsoft/vscode --output-ai-response debug_response.json
+```
+
+This is useful for:
+- **Debugging AI parsing**: See the raw JSON response from the AI
+- **Response validation**: Verify the AI is returning the expected format
+- **Performance analysis**: Analyze response quality and completeness
+- **Development testing**: Test AI response handling without affecting reports
+
+The generated file contains the raw JSON response with all optimization recommendations as returned by the AI.
 
 ## 🔧 Configuration
 

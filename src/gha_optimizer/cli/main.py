@@ -93,7 +93,12 @@ def cli(ctx: click.Context, config: Optional[Path], verbose: bool) -> None:
 @click.option(
     "--output-prompt-file",
     type=click.Path(path_type=Path),
-    help="Debug: Save AI prompt to file without making API call",
+    help="Debug: Save AI prompt to file",
+)
+@click.option(
+    "--output-ai-response",
+    type=click.Path(path_type=Path),
+    help="Debug: Save AI response to file",
 )
 @click.pass_context
 def scan(
@@ -105,6 +110,7 @@ def scan(
     max_history_days: int,
     workflows: tuple,
     output_prompt_file: Optional[Path],
+    output_ai_response: Optional[Path],
 ) -> None:
     """
     Analyze GitHub repository workflows and generate optimization report.
@@ -137,6 +143,7 @@ def scan(
             max_history_days=max_history_days,
             workflow_files=list(workflows) if workflows else None,
             output_prompt_file=output_prompt_file,
+            output_ai_response=output_ai_response,
         )
 
         if result.success:
