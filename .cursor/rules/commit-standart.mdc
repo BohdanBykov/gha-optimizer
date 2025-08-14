@@ -1,0 +1,39 @@
+---
+description: explains how to create conventional commits if user asks
+globs:
+alwaysApply: true
+---
+
+```
+MANDATORY: ALL commits must follow Conventional Commit specification.
+
+FORMAT:
+  <type>[optional scope]: <description>
+
+VALID TYPES:
+  feat:     new feature for users
+  fix:      bug fix for users
+  docs:     documentation changes
+  style:    code formatting (no functional changes)
+  refactor: code changes that neither fix bugs nor add features
+  test:     adding or updating tests
+  chore:    maintenance tasks (dependencies, build, etc.)
+
+RULES:
+  - Description must be lowercase
+  - Description must NOT end with a period
+  - Description must be concise and clear
+  - Use imperative mood ("add" not "added" or "adds")
+
+EXAMPLES:
+  ✅ feat: add user authentication
+  ✅ fix(api): resolve timeout issues
+  ✅ docs: update installation guide
+  ✅ style: format code with black
+  ✅ chore: update dependencies
+
+  ❌ feat: Add user authentication.
+  ❌ Fixed timeout issues
+  ❌ CRITICAL FIX: resolve bug
+  ❌ style: Format Code With Black
+```

@@ -1,0 +1,19 @@
+---
+description: core-constraints
+globs:
+alwaysApply: true
+---
+
+TECHNOLOGY_STACK - You must only use:
+  - Python 3.11
+  - Anthropic Claude API
+  - Click framework for CLI commands
+  - Trunk-based development workflow
+  - Tag-triggered releases only
+
+ABSOLUTELY FORBIDDEN - Never implement or suggest:
+  - Multiple Python version support
+  - Complex CI/CD automation
+  - PyPI publishing (GitHub releases only)
+  - Long-lived feature branches
+  - User-defined version inputs in releases
