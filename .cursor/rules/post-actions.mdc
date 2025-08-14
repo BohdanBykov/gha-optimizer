@@ -1,0 +1,18 @@
+---
+description: actions AI should do implementing any solution to validate the change
+globs:
+alwaysApply: true
+---
+
+MANDATORY VALIDATION SEQUENCE:
+
+ALWAYS RUN IF MAKING CODE CHANGES:
+- make sure python venv is used
+- python test_cli.py                  
+- black src/
+- isort src/
+- flake8 src/                           # Linting (fix critical issues only)
+- mypy src/gha_optimizer                # Type checking (fix type errors)
+- bandit -r src/gha_optimizer           # Security scanning (fix security issues)
+
+ALL MUST PASS - fix issues before proceeding.
