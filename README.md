@@ -47,6 +47,9 @@ gha-optimizer scan microsoft/vscode
 # Or analyze with more recent data
 gha-optimizer scan microsoft/vscode --max-history-days 7
 
+# Analyze specific workflow files only
+gha-optimizer scan microsoft/vscode -w \'ci.yml\' -w \'test.yml\'
+
 # Debug: Save AI prompt to file without making API call
 gha-optimizer scan microsoft/vscode --output-prompt-file debug_prompt.txt
 ```

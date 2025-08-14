@@ -73,13 +73,14 @@ class GitHubClient:
 
         return session
 
-    def collect_workflows(self, owner: str, repo: str) -> List[Workflow]:
+    def collect_workflows(self, owner: str, repo: str, workflow_files: Optional[List[str]] = None) -> List[Workflow]:
         """
         Collect all workflows from a repository.
 
         Args:
             owner: Repository owner
             repo: Repository name
+            workflow_files: Optional list of workflow filenames to filter (e.g., ['ci.yml'])
 
         Returns:
             List of Workflow objects
@@ -103,10 +104,48 @@ class GitHubClient:
 
             workflows_data = response.json()
             workflows = []
-
+            available_workflows = [w["path"] for w in workflows_data.get("workflows", [])]
+            
+            # If specific workflows are requested, validate they exist
+            if workflow_files is not None:
+                missing_workflows = []
+                requested_workflows = set()
+                
+                for requested_filename in workflow_files:
+                    # Try to match the requested filename with available workflows
+                    matched = False
+                    
+                    for available_path in available_workflows:
+                        available_filename = available_path.split('/')[-1]
+                        if available_filename == requested_filename:
+                            requested_workflows.add(available_path)
+                            matched = True
+                            break
+                    
+                    if not matched:
+                        missing_workflows.append(requested_filename)
+                
+                if missing_workflows:
+                    available_filenames = [path.split('/')[-1] for path in available_workflows]
+                    available_list = "\n  - ".join(available_filenames)
+                    raise GitHubAPIError(
+                        f"Requested workflow(s) not found: {', '.join(missing_workflows)}\n"
+                        f"Available workflows:\n  - {available_list}"
+                    )
+                
+                self.logger.info(f"Filtering to {len(requested_workflows)} requested workflows")
+            
             for workflow_data in workflows_data.get("workflows", []):
-                # Get workflow file content using Contents API
                 file_path = workflow_data["path"]
+                
+                # Filter workflows if specific files are requested
+                if workflow_files is not None:
+                    filename = file_path.split('/')[-1]
+                    if filename not in workflow_files:
+                        self.logger.debug(f"Skipping workflow {file_path} (not in requested list)")
+                        continue
+                
+                # Get workflow file content using Contents API
                 contents_url = f"{self.base_url}/repos/{owner}/{repo}/contents/{file_path}"
                 file_response = self.session.get(contents_url)
 

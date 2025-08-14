@@ -85,6 +85,12 @@ def cli(ctx: click.Context, config: Optional[Path], verbose: bool) -> None:
     help="Maximum days of workflow history to analyze",
 )
 @click.option(
+    "--workflows",
+    "-w",
+    multiple=True,
+    help="Specific workflow files to analyze (e.g., ci.yml). Can be specified multiple times.",
+)
+@click.option(
     "--output-prompt-file",
     type=click.Path(path_type=Path),
     help="Debug: Save AI prompt to file without making API call",
@@ -97,6 +103,7 @@ def scan(
     output: Optional[Path],
     format: str,
     max_history_days: int,
+    workflows: tuple,
     output_prompt_file: Optional[Path],
 ) -> None:
     """
@@ -128,6 +135,7 @@ def scan(
             output_file=output,
             output_format=format,
             max_history_days=max_history_days,
+            workflow_files=list(workflows) if workflows else None,
             output_prompt_file=output_prompt_file,
         )
 
