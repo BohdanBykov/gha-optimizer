@@ -42,14 +42,6 @@ class AIWorkflowAnalyzer:
         """
         self.logger.info(f"Starting AI analysis of {len(workflows)} workflows")
 
-        # For demo purposes, limit to first 3 workflows
-        if len(workflows) > 3:
-            self.logger.info(
-                f"Demo mode: limiting analysis to first 3 workflows out of {len(workflows)}"
-            )
-            workflow_items = list(workflows.items())[:3]
-            workflows = dict(workflow_items)
-
         # Build comprehensive prompt with all workflows and IDs
         prompt = self._build_multi_workflow_prompt(workflows, repository_stats)
 
@@ -78,14 +70,6 @@ class AIWorkflowAnalyzer:
             Complete prompt string that would be sent to AI
         """
         self.logger.info(f"Generating prompt for {len(workflows)} workflows (debug mode)")
-
-        # Apply same demo limitation as in regular analysis
-        if len(workflows) > 3:
-            self.logger.info(
-                f"Demo mode: limiting prompt generation to first 3 workflows out of {len(workflows)}"
-            )
-            workflow_items = list(workflows.items())[:3]
-            workflows = dict(workflow_items)
 
         # Use the same prompt building logic as regular analysis
         prompt = self._build_multi_workflow_prompt(workflows, repository_stats)

@@ -63,12 +63,34 @@ def test_cli():
     except Exception as e:
         print(f"❌ Workflow filtering flag test failed: {e}")
     
+    # Test debug options availability
+    print("\n5. Testing debug options:")
+    try:
+        import click.testing
+        runner = click.testing.CliRunner()
+        result = runner.invoke(cli, ["scan", "--help"])
+        
+        debug_options_found = 0
+        if "--output-prompt-file" in result.output:
+            debug_options_found += 1
+        if "--output-ai-response" in result.output:
+            debug_options_found += 1
+            
+        if debug_options_found == 2:
+            print("✅ Both debug options are present in help output")
+        else:
+            print(f"❌ Only {debug_options_found}/2 debug options found in help output")
+            print(f"Help output: {result.output}")
+    except Exception as e:
+        print(f"❌ Debug options test failed: {e}")
+    
     print("\n🎉 CLI integration tests completed!")
     print("\nCore CLI functionality verified:")
     print("✓ Help system")
     print("✓ Version information") 
     print("✓ Scan command help")
     print("✓ Workflow filtering flag")
+    print("✓ Debug options")
     print("✓ CLI structure and imports")
     print("✓ Basic command framework")
 

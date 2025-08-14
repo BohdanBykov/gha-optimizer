@@ -45,6 +45,7 @@ class ScanCommand:
         max_history_days: int = 30,
         workflow_files: Optional[List[str]] = None,
         output_prompt_file: Optional[Path] = None,
+        output_ai_response: Optional[Path] = None,
     ) -> ScanResult:
         """
         Execute scan command.
@@ -56,7 +57,8 @@ class ScanCommand:
             output_format: Output format (markdown, html, json)
             max_history_days: Maximum days of workflow history to analyze
             workflow_files: List of specific workflow files to analyze (optional)
-            output_prompt_file: Debug option to save AI prompt to file without API call
+            output_prompt_file: Debug option to save AI prompt to file (doesn't block analysis)
+            output_ai_response: Debug option to save AI response to file before report generation
 
         Returns:
             ScanResult with success status, recommendations, and impact metrics
@@ -118,7 +120,7 @@ class ScanCommand:
             # Run AI analysis on raw workflows or save prompt to file
             ai_analyzer = AIWorkflowAnalyzer(self.config, self.logger)
 
-            # Debug mode: Save prompt to file without making API call
+            # Debug mode: Save prompt to file
             if output_prompt_file:
                 self.logger.info(f"Debug mode: Saving AI prompt to {output_prompt_file}")
                 prompt_content = ai_analyzer.generate_prompt_only(raw_workflows, workflow_data)
@@ -127,24 +129,24 @@ class ScanCommand:
                     with open(output_prompt_file, "w", encoding="utf-8") as f:
                         f.write(prompt_content)
                     self.logger.info(f"Prompt saved successfully to {output_prompt_file}")
-
-                    return ScanResult(
-                        success=True,
-                        recommendations=[],
-                        estimated_savings=0.0,
-                        time_savings=0.0,
-                        error=None,
-                    )
                 except Exception as e:
-                    return ScanResult(
-                        success=False,
-                        recommendations=[],
-                        estimated_savings=0.0,
-                        time_savings=0.0,
-                        error=f"Failed to save prompt to file: {e}",
-                    )
+                    self.logger.warning(f"Failed to save prompt to file: {e}")
 
             ai_recommendations = ai_analyzer.analyze_workflows(raw_workflows, workflow_data)
+
+            # Debug mode: Save AI response to file before report generation
+            if output_ai_response:
+                self.logger.info(f"Debug mode: Saving AI response to {output_ai_response}")
+                try:
+                    # Convert recommendations back to JSON for debugging
+                    import json
+
+                    response_content = json.dumps(ai_recommendations, indent=2, ensure_ascii=False)
+                    with open(output_ai_response, "w", encoding="utf-8") as f:
+                        f.write(response_content)
+                    self.logger.info(f"AI response saved successfully to {output_ai_response}")
+                except Exception as e:
+                    self.logger.warning(f"Failed to save AI response to file: {e}")
 
             # Calculate impact metrics from AI recommendations
             estimated_savings, time_savings = self._calculate_impact_from_ai_recommendations(
