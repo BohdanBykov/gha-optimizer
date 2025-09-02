@@ -5,7 +5,7 @@ A pluggable tool that analyzes GitHub Actions workflows and generates
 actionable optimization recommendations with quantified impact metrics.
 """
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __author__ = "https://github.com/BohdanBykov"
 
 from .analyzers.ai_analyzer import AIWorkflowAnalyzer
