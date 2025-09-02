@@ -165,10 +165,10 @@ cd gha-optimizer
 # Test scan command with your test repository
 gha-optimizer --config test-config.yml scan your-username/gha-optimizer-test-repo
 
-# Test with AI enhancement
-gha-optimizer --config test-config.yml scan --ai-enhanced your-username/gha-optimizer-test-repo
+# Test with debug options
+gha-optimizer --config test-config.yml scan your-username/gha-optimizer-test-repo --local-docs --output-prompt-file debug.txt
 
-# Test apply command (dry run)
+# Test apply command (dry run)  
 gha-optimizer --config test-config.yml apply --dry-run your-username/gha-optimizer-test-repo
 ```
 
@@ -226,28 +226,17 @@ gha-optimizer scan your-username/gha-optimizer-test-repo
 - Runner optimization recommendations
 - Time/cost savings estimates
 
-### **Scenario 2: AI-Enhanced Analysis**
+### **Scenario 2: Debug Mode Analysis**
 ```bash
-# Should provide intelligent, context-aware recommendations
-gha-optimizer scan --ai-enhanced your-username/gha-optimizer-test-repo
+# Should use local documentation and save debug information
+gha-optimizer scan your-username/gha-optimizer-test-repo --local-docs --output-prompt-file debug.txt --output-ai-response response.json
 ```
 
 **Expected Output**:
+- Debug files with prompt and AI response data
+- Local documentation usage confirmation in logs
+- Complete analysis with same quality as remote mode
 - Detailed optimization explanations for each workflow
-- Repository-specific recommendations
-- Advanced pattern detection across multiple languages
-- Workflow-specific optimization strategies
-
-### **Scenario 3: PR Generation**
-```bash
-# Should create pull requests with optimizations
-gha-optimizer apply --dry-run your-username/gha-optimizer-test-repo
-```
-
-**Expected Output**:
-- List of PRs that would be created for each workflow
-- Estimated impact of each optimization
-- Detailed implementation preview for each pattern
 
 ## 🚀 **Next Steps**
 

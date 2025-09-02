@@ -44,6 +44,9 @@ export ANTHROPIC_API_KEY=sk-ant-your_anthropic_key
 ```bash
 # Test with a public repository
 gha-optimizer scan microsoft/vscode --max-history-days 7
+
+# Test with debug features
+gha-optimizer scan microsoft/vscode --local-docs --output-prompt-file debug.txt
 ```
 
 ## 🔧 Alternative Configuration
@@ -57,6 +60,7 @@ github:
 ai:
   provider: "anthropic"
   api_key: "sk-ant-your_anthropic_key"
+  model: "claude-3-haiku-20240307"
 
 analysis:
   max_history_days: 30

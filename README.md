@@ -17,7 +17,8 @@ GHA-Optimizer scans your GitHub repositories and finds ways to make your CI/CD w
 
 - **Save Time**: Reduce workflow run times by 30-50%
 - **Save Money**: Lower GitHub Actions runner costs
-- **Best Practices**: Automatically apply CI/CD optimization patterns (planned)
+- **Accurate Analysis**: Uses version-specific optimization patterns for consistent recommendations
+- **Best Practices**: Automatically apply proven CI/CD optimization patterns
 - **Easy Setup**: Get started in under 5 minutes
 
 ## 🚀 Quick Start
@@ -69,7 +70,7 @@ The tool will show you:
 - **[Installation Guide](./INSTALL.md)** - Detailed setup instructions
 - **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute to the project
 - **[Architecture Overview](./docs/architecture.md)** - Technical details
-- **[Optimization Patterns](./docs/optimization-patterns.md)** - What we optimize
+- **[Optimization Patterns](./docs/optimization-patterns.md)** - Version-aligned optimization patterns and guidelines
 
 ## 🛠️ Development
 
@@ -135,6 +136,29 @@ This is useful for:
 - **Development testing**: Test AI response handling without affecting reports
 
 The generated file contains the raw JSON response with all optimization recommendations as returned by the AI.
+
+## 📚 Documentation-Driven Analysis
+
+GHA-Optimizer uses a unique approach to ensure accurate and consistent AI recommendations:
+
+### Version-Aligned Documentation
+- **Comprehensive Patterns**: All optimization patterns are packaged with the tool for consistent access
+- **Version Control**: Documentation versions match tool releases for consistency
+- **AI Reference**: The AI analyzer loads packaged documentation to guide analysis
+- **Pattern Specificity**: Each pattern includes confidence guidelines and impact calculations
+
+### Benefits of This Approach
+- **Consistent Results**: Same workflows analyzed with same tool version produce identical recommendations
+- **Transparent Logic**: All optimization patterns are documented and auditable
+- **Reduced Hallucination**: AI follows specific documented patterns rather than general knowledge
+- **Version Safety**: Tool updates include corresponding documentation updates
+
+### Pattern Categories
+- **High-Impact**: Dependency caching, parallelization, Docker optimization
+- **Medium-Impact**: Conditional execution, artifact optimization, environment setup
+- **Confidence Scoring**: Clear guidelines for 0.2-1.0 confidence ranges
+
+This ensures that recommendations are not only accurate but also reproducible and trustworthy.
 
 ## 🔧 Configuration
 
