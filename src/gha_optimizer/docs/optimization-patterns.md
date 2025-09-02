@@ -1,6 +1,20 @@
 # Optimization Patterns
 
-This document outlines the specific optimization patterns that GHA-Optimizer detects and the recommendations it provides.
+**Version:** 1.2.0
+**Last Updated:** September 2025
+**Repository:** https://github.com/BohdanBykov/gha-optimizer
+
+This document serves as the authoritative reference for GitHub Actions workflow optimization patterns detected by GHA-Optimizer. It provides specific patterns, implementation examples, impact calculations, and confidence scoring guidelines that the AI analyzer uses to generate accurate recommendations.
+
+## 📋 **Documentation Purpose**
+
+This document is directly referenced by the AI analyzer to ensure:
+- **Consistent recommendations** across analysis runs
+- **Accurate impact calculations** based on real-world data  
+- **Version-aligned guidance** that matches tool capabilities
+- **Reliable confidence scoring** based on pattern clarity
+
+> **Note**: This documentation is version-controlled and linked to specific GHA-Optimizer releases. Always reference the documentation version that matches your tool version for accurate analysis.
 
 ## 🚀 **High-Impact Optimizations**
 
@@ -414,4 +428,129 @@ def calculate_cost_savings(time_saved: timedelta, runner_type: str, runs_per_mon
     minutes_saved = time_saved.total_seconds() / 60
     
     return minutes_saved * cost_per_minute * runs_per_month
-``` 
+```
+
+## 🎯 **Confidence Scoring Guidelines**
+
+The AI analyzer must assign confidence scores based on these criteria:
+
+### **High Confidence (0.8-1.0)**
+- **Missing dependency caching**: Clear package manager commands without cache actions
+- **Obviously inefficient runners**: 8-core runners for linting/formatting
+- **Clear parallelization opportunities**: Independent test suites running sequentially
+- **Missing Docker layer caching**: Standard `docker build` commands
+
+### **Medium Confidence (0.6-0.8)**  
+- **Potential parallelization**: Jobs with unclear dependencies
+- **Runner right-sizing**: Workload assessment based on step types
+- **Conditional execution**: Workflows triggering on all file changes
+- **Artifact optimization**: Large artifact uploads without specific paths
+
+### **Low Confidence (0.4-0.6)**
+- **Complex workflow dependencies**: Unclear if parallelization is safe
+- **Advanced optimizations**: Smart test selection, custom caching strategies
+- **Environment-specific optimizations**: Dependent on repository context
+
+### **Very Low Confidence (0.2-0.4)**
+- **Speculative optimizations**: Based on limited workflow context
+- **Repository-dependent patterns**: Requiring deep knowledge of codebase
+- **Complex CI/CD patterns**: Multiple workflow interactions
+
+## 📊 **Impact Calculation Standards**
+
+### **Time Savings (Minutes per Run)**
+
+#### **Dependency Caching**
+- **Node.js (npm/yarn)**: 2-5 minutes for medium projects, 5-10 for large
+- **Python (pip)**: 1-3 minutes for typical projects, 3-6 for ML/data science
+- **Java (Maven)**: 3-8 minutes for enterprise projects
+- **Docker builds**: 3-15 minutes depending on image complexity
+
+#### **Parallelization**
+- **Test suites**: 40-60% time reduction (measure against longest single job)
+- **Matrix builds**: Already optimal if properly configured
+- **Independent jobs**: Sum of all parallelizable jobs minus longest
+
+#### **Runner Optimization**
+- **Over-provisioned**: 15-30% cost reduction with minimal time impact
+- **Under-provisioned**: 20-40% time reduction for compute-heavy workloads
+
+### **Monthly Cost Calculation**
+```
+Monthly Savings = (Minutes Saved × Runs per Week × 4.33 × Cost per Minute)
+
+Where:
+- Minutes Saved: Based on pattern-specific estimates above
+- Runs per Week: Repository activity (use 50 as conservative default)
+- Cost per Minute: Runner-type specific ($0.008 for ubuntu-latest)
+```
+
+
+
+## 🔍 **Pattern Detection Specificity**
+
+### **Exact Pattern Matches (High Confidence)**
+```yaml
+# Missing Node.js caching - DEFINITIVE PATTERN
+- name: Install dependencies
+  run: npm ci  # or npm install, yarn install
+# Missing: actions/cache step before this
+
+# Missing Python caching - DEFINITIVE PATTERN  
+- name: Install dependencies
+  run: pip install -r requirements.txt
+# Missing: actions/cache step before this
+```
+
+### **Contextual Pattern Matches (Medium Confidence)**
+```yaml
+# Sequential test jobs - PROBABLE PATTERN
+jobs:
+  unit-test:
+    steps: [checkout, setup, test-unit]
+  integration-test:
+    needs: unit-test  # This dependency may be unnecessary
+    steps: [checkout, setup, test-integration]
+```
+
+### **Complex Pattern Analysis (Lower Confidence)**
+```yaml
+# Complex workflow dependencies - UNCERTAIN PATTERN
+jobs:
+  job-a:
+    steps: [checkout, build-artifact]
+  job-b: 
+    needs: job-a  # May or may not need the artifact
+    steps: [checkout, different-task]
+```
+
+## 📝 **Recommendation Template**
+
+All AI recommendations must follow this exact structure:
+
+```json
+{
+  "title": "Descriptive action-oriented title",
+  "type": "caching|parallelization|runner|docker|conditional|artifact|environment",
+  "priority": "high|medium|low",
+  "workflow_file": "exact file path from workflow input",
+  "job_name": "specific job name or 'multiple'",
+  "line_number": "exact line number where optimization applies",
+  "description": "Clear explanation of current inefficiency and impact",
+  "impact_time_minutes": "realistic time savings based on guidelines above",
+  "monthly_cost_savings": "calculated using standard formula",
+  "confidence_score": "0.0-1.0 based on pattern clarity guidelines",
+  "implementation": "Step-by-step implementation description",
+  "code_example": "Complete YAML code ready to copy-paste"
+}
+```
+
+## 🚨 **Critical Analysis Requirements**
+
+1. **Line Number Accuracy**: Always provide exact line numbers relative to workflow file start
+2. **Cost Validation**: All cost calculations must pass validation logic  
+3. **Pattern Specificity**: Only recommend optimizations with clear pattern matches
+4. **Implementation Readiness**: Code examples must be immediately usable
+5. **Confidence Honesty**: Use conservative confidence scores when uncertain
+
+This documentation ensures that AI analysis provides consistent, accurate, and actionable optimization recommendations that users can trust and implement immediately. 
