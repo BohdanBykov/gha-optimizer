@@ -100,6 +100,11 @@ def cli(ctx: click.Context, config: Optional[Path], verbose: bool) -> None:
     type=click.Path(path_type=Path),
     help="Debug: Save AI response to file",
 )
+@click.option(
+    "--local-docs",
+    is_flag=True,
+    help="Debug: Use local documentation instead of remote",
+)
 @click.pass_context
 def scan(
     ctx: click.Context,
@@ -111,6 +116,7 @@ def scan(
     workflows: tuple,
     output_prompt_file: Optional[Path],
     output_ai_response: Optional[Path],
+    local_docs: bool,
 ) -> None:
     """
     Analyze GitHub repository workflows and generate optimization report.
@@ -144,6 +150,7 @@ def scan(
             workflow_files=list(workflows) if workflows else None,
             output_prompt_file=output_prompt_file,
             output_ai_response=output_ai_response,
+            local_docs=local_docs,
         )
 
         if result.success:

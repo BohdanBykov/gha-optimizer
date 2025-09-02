@@ -46,6 +46,7 @@ class ScanCommand:
         workflow_files: Optional[List[str]] = None,
         output_prompt_file: Optional[Path] = None,
         output_ai_response: Optional[Path] = None,
+        local_docs: bool = False,
     ) -> ScanResult:
         """
         Execute scan command.
@@ -118,7 +119,7 @@ class ScanCommand:
             )
 
             # Run AI analysis on raw workflows or save prompt to file
-            ai_analyzer = AIWorkflowAnalyzer(self.config, self.logger)
+            ai_analyzer = AIWorkflowAnalyzer(self.config, self.logger, local_docs)
 
             # Debug mode: Save prompt to file
             if output_prompt_file:
