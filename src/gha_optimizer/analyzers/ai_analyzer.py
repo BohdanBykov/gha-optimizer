@@ -5,8 +5,13 @@ import logging
 import re
 import time
 from functools import lru_cache
+from importlib.resources import files
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import requests
+
+from .. import __version__
 from ..utils.config import Config
 from ..utils.helpers import validate_cost_calculation
 
@@ -14,10 +19,13 @@ from ..utils.helpers import validate_cost_calculation
 class AIWorkflowAnalyzer:
     """AI-powered analyzer for GitHub Actions workflows using predefined optimization patterns."""
 
-    def __init__(self, config: Config, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self, config: Config, logger: Optional[logging.Logger] = None, local_docs: bool = False
+    ) -> None:
         """Initialize AI analyzer."""
         self.config = config
         self.logger = logger or logging.getLogger(__name__)
+        self.local_docs = local_docs
 
         # Validate AI configuration
         if not self.config.ai_api_key:
@@ -26,6 +34,9 @@ class AIWorkflowAnalyzer:
         self.logger.info(
             f"Initialized AI analyzer with {self.config.ai_provider} ({self.config.ai_model})"
         )
+
+        if self.local_docs:
+            self.logger.info("Local documentation mode enabled for debugging")
 
     def analyze_workflows(
         self, workflows: Dict[str, str], repository_stats: Dict[str, Any]
@@ -43,7 +54,7 @@ class AIWorkflowAnalyzer:
         self.logger.info(f"Starting AI analysis of {len(workflows)} workflows")
 
         # Build comprehensive prompt with all workflows and IDs
-        prompt = self._build_multi_workflow_prompt(workflows, repository_stats)
+        prompt = self._build_workflow_prompt(workflows, repository_stats)
 
         # Single AI API call for all workflows
         ai_response = self._call_ai_api(prompt)
@@ -72,12 +83,12 @@ class AIWorkflowAnalyzer:
         self.logger.info(f"Generating prompt for {len(workflows)} workflows (debug mode)")
 
         # Use the same prompt building logic as regular analysis
-        prompt = self._build_multi_workflow_prompt(workflows, repository_stats)
+        prompt = self._build_workflow_prompt(workflows, repository_stats)
 
         self.logger.info(f"Prompt generated successfully: {len(prompt)} characters")
         return prompt
 
-    def _build_multi_workflow_prompt(
+    def _build_workflow_prompt(
         self, workflows: Dict[str, str], repository_stats: Dict[str, Any]
     ) -> str:
         """Build single prompt with all workflows using IDs for cost efficiency."""
@@ -109,7 +120,9 @@ class AIWorkflowAnalyzer:
 
         workflows_text = "\n".join(workflows_section)
 
-        return f"""You are an expert GitHub Actions optimization analyst. Analyze ALL workflows below for optimization opportunities.
+        return f"""You are an expert GitHub Actions optimization analyst powered by GHA-Optimizer v{__version__}.
+
+ANALYSIS TASK: Analyze ALL workflows below for optimization opportunities using the comprehensive patterns documentation provided.
 
 ## Repository Context
 - **Repository**: {repository_stats.get('repository', {}).get('full_name', 'Unknown')}
@@ -117,6 +130,7 @@ class AIWorkflowAnalyzer:
 - **Activity**: {repository_stats.get('runs_count', 0)} runs in {repository_stats.get('analysis_days', 30)} days (~{runs_per_week:.0f}/week)
 - **Total Workflows**: {len(workflows)}
 
+## Optimization Patterns Documentation
 {optimization_patterns}
 
 ## Workflows to Analyze
@@ -156,7 +170,6 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
     "impact_time_minutes": 3.0,
     "monthly_cost_savings": 31.19,
     "confidence_score": 0.9,
-    "implementation_effort": "low",
     "implementation": "Add actions/cache@v3 before npm install",
     "code_example": "- uses: actions/cache@v3\\n  with:\\n    path: ~/.npm\\n    key: ${{{{ runner.os }}}}-node-${{{{ hashFiles('package-lock.json') }}}}"
   }}
@@ -178,8 +191,10 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
 
         except Exception as e:
             self.logger.error(f"AI API call failed: {e}")
-            # Return fallback analysis based on simple pattern matching
-            return self._fallback_pattern_analysis(prompt)
+            raise RuntimeError(
+                f"AI analysis failed and no fallback available. GHA-Optimizer requires AI API access. "
+                f"Please check your API key and network connection. Error: {e}"
+            )
 
     def _call_anthropic_api(self, prompt: str) -> List[Dict[str, Any]]:
         """Call Anthropic Claude API for workflow analysis with simple retry logic."""
@@ -243,128 +258,198 @@ Return ONLY a JSON array with ALL optimizations found across ALL workflows:
         # This should never be reached due to the loop structure, but mypy requires it
         return []
 
-    def _fallback_pattern_analysis(self, prompt: str) -> List[Dict[str, Any]]:
-        """Fallback pattern-based analysis when AI API fails."""
-        self.logger.warning("Using fallback pattern analysis due to AI API failure")
-
-        # Extract workflows from prompt
-        workflow_pattern = r"FILE: (.+?)\n```yaml\n(.*?)\n```"
-        workflows = re.findall(workflow_pattern, prompt, re.DOTALL)
-
-        recommendations = []
-
-        for file_path, workflow_content in workflows:
-            # Simple pattern detection
-            if "npm ci" in workflow_content and "actions/cache" not in workflow_content:
-                recommendations.append(
-                    {
-                        "title": "Add Node.js Dependency Caching",
-                        "type": "caching",
-                        "priority": "high",
-                        "workflow_file": file_path,
-                        "job_name": "build",
-                        "description": "Missing npm dependency caching detected",
-                        "impact_time_minutes": 3.0,
-                        "monthly_cost_savings": 75.0,
-                        "confidence_score": 0.8,
-                        "implementation_effort": "low",
-                        "implementation": "Add actions/cache@v3 for npm dependencies",
-                        "code_example": "- name: Cache Node.js dependencies\\n  uses: actions/cache@v3\\n  with:\\n    path: ~/.npm\\n    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}",
-                    }
-                )
-
-            if "pip install" in workflow_content and "actions/cache" not in workflow_content:
-                recommendations.append(
-                    {
-                        "title": "Add Python Dependency Caching",
-                        "type": "caching",
-                        "priority": "high",
-                        "workflow_file": file_path,
-                        "job_name": "test",
-                        "description": "Missing pip dependency caching detected",
-                        "impact_time_minutes": 2.5,
-                        "monthly_cost_savings": 60.0,
-                        "confidence_score": 0.8,
-                        "implementation_effort": "low",
-                        "implementation": "Add actions/cache@v3 for pip dependencies",
-                        "code_example": "- name: Cache pip dependencies\\n  uses: actions/cache@v3\\n  with:\\n    path: ~/.cache/pip\\n    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}",
-                    }
-                )
-
-        return recommendations
-
     @lru_cache(maxsize=1)
     def _get_optimization_patterns_from_docs(self) -> str:
         """Return comprehensive optimization patterns based on documentation.
 
-        Cached since this is expensive string processing that doesn't change.
+        Strategy:
+        1. If --local-docs: Use local documentation (debug mode)
+        2. Remote first: Try GitHub documentation (prompt economy)
+        3. Fallback chain: packaged → local development
         """
-        return """
-OPTIMIZATION PATTERNS TO DETECT:
+        github_url = f"https://github.com/BohdanBykov/gha-optimizer/blob/v{__version__}/docs/optimization-patterns.md"
 
-## 1. HIGH-IMPACT OPTIMIZATIONS
+        # Debug mode: force local documentation
+        if self.local_docs:
+            self.logger.info("Using local documentation for debugging")
+            doc_content, source = self._load_documentation_content(force_local=True)
+            return self._wrap_documentation_for_prompt(
+                doc_content, github_url, source, is_debug=True
+            )
 
-### DEPENDENCY CACHING
-**Node.js Dependencies:**
-- Pattern: Look for "npm ci", "npm install", "yarn install" WITHOUT preceding actions/cache step
-- Implementation: Add actions/cache@v3 with path ~/.npm and key based on package-lock.json
-- Impact: 2-5 minutes saved per run, ~$50-150/month cost reduction
+        # Normal mode: try remote first for prompt economy
+        if self._try_fetch_remote_documentation(github_url):
+            return self._create_remote_documentation_reference(github_url)
 
-**Python Dependencies:**
-- Pattern: Look for "pip install" WITHOUT preceding actions/cache step
-- Implementation: Add actions/cache@v3 with path ~/.cache/pip and key based on requirements.txt
-- Impact: 1-3 minutes saved per run
+        # Fallback: load local content
+        self.logger.warning("Remote documentation fetch failed, using local fallback")
+        doc_content, source = self._load_documentation_content(force_local=False)
+        return self._wrap_documentation_for_prompt(doc_content, github_url, source, is_debug=False)
 
-**Maven/Gradle Dependencies:**
-- Pattern: Look for "mvn", "gradle" commands WITHOUT cache
-- Implementation: Add actions/cache@v3 with path ~/.m2 or ~/.gradle
-- Impact: 3-8 minutes saved per run
+    def _try_fetch_remote_documentation(self, github_url: str) -> bool:
+        """Try to fetch remote documentation to verify it exists and is accessible."""
+        try:
+            # Convert GitHub blob URL to raw content URL for verification
+            raw_url = github_url.replace("/blob/", "/raw/")
 
-### JOB PARALLELIZATION
-- Pattern: Sequential jobs with no dependencies that could run in parallel
-- Pattern: Test suites running sequentially (unit, integration, e2e)
-- Implementation: Split into parallel jobs or use matrix strategy
-- Impact: 40-60% reduction in total pipeline time
+            self.logger.debug(f"Checking remote documentation availability: {raw_url}")
 
-### DOCKER OPTIMIZATION
-- Pattern: "docker build" WITHOUT Docker layer caching
-- Pattern: Multiple docker builds without BuildKit
-- Implementation: Use docker/build-push-action@v4 with cache-from/cache-to
-- Impact: 3-8 minutes saved per build
+            # Use HEAD request with redirect following
+            response = requests.head(raw_url, timeout=5, allow_redirects=True)
 
-### RUNNER OPTIMIZATION
-- Pattern: Over-provisioned runners (8-cores for linting, documentation builds)
-- Pattern: Under-provisioned runners (basic for heavy compilation)
-- Implementation: Right-size runners based on workload
-- Cost Analysis: ubuntu-latest ($0.008/min), ubuntu-latest-4-cores ($0.016/min), ubuntu-latest-8-cores ($0.032/min)
+            if response.status_code == 200:
+                self.logger.info(f"Remote documentation verified: {github_url}")
+                return True
+            else:
+                # If HEAD fails, try a lightweight GET request to be sure
+                self.logger.debug(
+                    f"HEAD request failed ({response.status_code}), trying GET request"
+                )
+                get_response = requests.get(raw_url, timeout=5, stream=True)
 
-## 2. MEDIUM-IMPACT OPTIMIZATIONS
+                if get_response.status_code == 200:
+                    # Don't download full content, just verify it's accessible
+                    get_response.close()
+                    self.logger.info(f"Remote documentation verified via GET: {github_url}")
+                    return True
+                else:
+                    self.logger.warning(
+                        f"Remote documentation not accessible: HEAD {response.status_code}, GET {get_response.status_code}"
+                    )
+                    return False
 
-### CONDITIONAL EXECUTION
-- Pattern: Workflows triggering on ALL file changes
-- Pattern: Missing path-based triggers for specific file types
-- Implementation: Add paths filter to workflow triggers
-- Impact: Reduce unnecessary runs by 30-50%
+        except requests.exceptions.RequestException as e:
+            self.logger.warning(f"Failed to verify remote documentation: {e}")
+            return False
+        except Exception as e:
+            self.logger.warning(f"Unexpected error checking remote documentation: {e}")
+            return False
 
-### ARTIFACT OPTIMIZATION
-- Pattern: Uploading entire workspace as artifacts
-- Pattern: Large artifacts without compression
-- Implementation: Selective artifact upload, exclude unnecessary files
-- Impact: Faster upload/download, reduced storage costs
+    def _create_remote_documentation_reference(self, github_url: str) -> str:
+        """Create compact prompt referencing remote documentation for prompt economy."""
+        self.logger.info(f"Using remote documentation reference for prompt economy: {github_url}")
+        return f"""
 
-### ENVIRONMENT OPTIMIZATION
-- Pattern: Redundant setup steps across jobs
-- Pattern: Missing shared caching between jobs
-- Implementation: Use job outputs, shared setup job
-- Impact: 1-2 minutes saved per job
+**Version:** {__version__}
+**Documentation URL:** {github_url}
 
-ANALYSIS INSTRUCTIONS:
-1. Scan each workflow for these exact patterns
-2. Calculate time savings based on pattern type and repository activity
-3. Estimate monthly cost savings using GitHub Actions pricing
-4. Provide specific implementation with exact code examples
-5. Set confidence scores based on pattern clarity (0.9 for obvious patterns, 0.7 for probable, 0.5 for possible)
+**INSTRUCTIONS:** The comprehensive optimization patterns documentation is available at the URL above.
+It contains detailed patterns, confidence scoring guidelines, impact calculations, and implementation examples.
+
+**KEY PATTERNS TO DETECT** (refer to full documentation for details):
+- Dependency caching (Node.js, Python, Java/Maven, Docker)
+- Job parallelization opportunities
+- Runner optimization (right-sizing)
+- Conditional execution improvements
+- Artifact optimization
+
+**CRITICAL ANALYSIS REQUIREMENTS:**
+1. Reference the documentation URL above for complete pattern details
+2. Use exact pattern matches for high confidence (0.8-1.0)
+3. Apply conservative confidence scores when patterns are unclear
+4. Provide specific line numbers and ready-to-use code examples
+5. Calculate realistic time savings and monthly costs
+6. Follow the JSON recommendation template from the documentation
+
+Use the patterns and guidelines from the documentation URL as your authoritative source.
 """
+
+    def _load_documentation_content(self, force_local: bool = False) -> tuple[str, str]:
+        """Load documentation content from available sources.
+
+        Returns:
+            tuple: (content, source_description)
+        """
+        if force_local:
+            # Debug mode: only try local development
+            try:
+                content = self._load_development_documentation()
+                self.logger.info("Using local development documentation (debug mode)")
+                return content, "local development documentation"
+            except Exception as e:
+                self.logger.error(f"Failed to load local development documentation: {e}")
+                raise ValueError(
+                    f"Cannot proceed without optimization patterns documentation. "
+                    f"Local development documentation unavailable. Error: {e}"
+                )
+
+        # Normal fallback chain: packaged → local development
+        try:
+            content = self._load_packaged_documentation()
+            self.logger.info("Using packaged documentation fallback")
+            return content, "packaged documentation"
+        except Exception as packaged_error:
+            self.logger.warning(f"Packaged documentation failed: {packaged_error}")
+            try:
+                content = self._load_development_documentation()
+                self.logger.info("Using local development documentation fallback")
+                return content, "local development documentation"
+            except Exception as dev_error:
+                self.logger.error(
+                    f"All documentation sources failed: packaged={packaged_error}, local={dev_error}"
+                )
+                raise ValueError(
+                    "Cannot proceed without optimization patterns documentation. "
+                    "All local sources are unavailable."
+                )
+
+    def _wrap_documentation_for_prompt(
+        self, doc_content: str, github_url: str, source: str, is_debug: bool = False
+    ) -> str:
+        """Wrap documentation content with consistent prompt instructions."""
+        # Verify version compatibility
+        if f"**Version:** {__version__}" not in doc_content:
+            self.logger.warning(
+                f"Documentation version mismatch. Tool: {__version__}. "
+                f"Recommendations may be inconsistent."
+            )
+
+        mode = "LOCAL DEBUG MODE" if is_debug else "LOCAL FALLBACK"
+        url_label = "Debug URL" if is_debug else "Intended URL"
+        note = (
+            "Using local documentation in debug mode."
+            if is_debug
+            else "Using local documentation fallback due to remote access issues."
+        )
+
+        return f"""
+GITHUB ACTIONS OPTIMIZATION PATTERNS DOCUMENTATION ({mode})
+Version: {__version__}
+Source: {source}
+{url_label}: {github_url}
+
+{doc_content}
+
+CRITICAL INSTRUCTIONS FOR AI ANALYSIS:
+1. Follow ALL guidelines and confidence scoring rules from the documentation above
+2. Use EXACT pattern matches for high confidence recommendations
+3. Apply cost calculation standards and validation requirements
+4. Reference specific line numbers and provide ready-to-use code examples
+5. Use conservative confidence scores when patterns are unclear
+
+Note: {note}
+"""
+
+    def _load_packaged_documentation(self) -> str:
+        """Load documentation from the packaged distribution."""
+        # Use importlib.resources to access packaged documentation
+        package_files = files("gha_optimizer.docs")
+        doc_file = package_files / "optimization-patterns.md"
+
+        if not doc_file.is_file():
+            raise FileNotFoundError("Packaged documentation not found")
+
+        return doc_file.read_text(encoding="utf-8")
+
+    def _load_development_documentation(self) -> str:
+        """Load documentation from development environment (src/gha_optimizer/docs/)."""
+        docs_path = Path(__file__).parent.parent / "docs" / "optimization-patterns.md"
+
+        if not docs_path.exists():
+            raise FileNotFoundError(f"Development documentation not found at {docs_path}")
+
+        with open(docs_path, "r", encoding="utf-8") as f:
+            return f.read()
 
     def _parse_ai_recommendations(
         self,
@@ -403,7 +488,6 @@ ANALYSIS INSTRUCTIONS:
                 "impact_time_minutes": float(rec.get("impact_time_minutes", 0)),
                 "monthly_cost_savings": float(rec.get("monthly_cost_savings", 0)),
                 "confidence_score": float(rec.get("confidence_score", 0.5)),
-                "implementation_effort": rec.get("implementation_effort", "medium"),
                 "implementation": rec.get("implementation", ""),
                 "code_example": rec.get("code_example", ""),
             }
@@ -464,7 +548,6 @@ ANALYSIS INSTRUCTIONS:
         """Extract JSON from AI response that may be wrapped in markdown code blocks."""
 
         # First try to find JSON in code blocks
-        import re
 
         # Look for ```json ... ``` blocks
         json_pattern = r"```(?:json)?\s*\n?(.*?)\n?```"

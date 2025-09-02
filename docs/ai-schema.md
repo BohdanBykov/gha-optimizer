@@ -22,7 +22,6 @@ The AI analyzer returns optimization recommendations in a standardized JSON form
     "impact_time_minutes": "number",
     "monthly_cost_savings": "number",
     "confidence_score": "number",
-    "implementation_effort": "string",
     "implementation": "string",
     "code_example": "string"
   }
@@ -42,7 +41,6 @@ The AI analyzer returns optimization recommendations in a standardized JSON form
 | `impact_time_minutes` | number | ✅ | Time saved per workflow run | `3.5`, `12.0`, `0.5` |
 | `monthly_cost_savings` | number | ✅ | Estimated monthly cost savings (USD) | `89.60`, `256.80`, `1200.00` |
 | `confidence_score` | number | ✅ | AI confidence in recommendation (0.0-1.0) | `0.9`, `0.7`, `0.5` |
-| `implementation_effort` | string | ✅ | Required effort to implement | `"low"`, `"medium"`, `"high"` |
 | `implementation` | string | ✅ | High-level implementation steps | "Add actions/cache@v3 before npm ci step with path ~/.npm and key based on package-lock.json hash" |
 | `code_example` | string | ✅ | Ready-to-use YAML code snippet | See code examples below |
 
@@ -73,14 +71,6 @@ The AI analyzer returns optimization recommendations in a standardized JSON form
 | `"medium"` | Good optimizations, moderate effort | $25-100/month |
 | `"low"` | Nice-to-have improvements | < $25/month |
 
-## 💡 **Implementation Effort**
-
-| Effort | Definition | Examples |
-|--------|------------|----------|
-| `"low"` | Simple configuration changes | Adding cache actions, changing runner types |
-| `"medium"` | Moderate refactoring required | Job restructuring, workflow splitting |
-| `"high"` | Significant changes needed | Architecture changes, custom actions |
-
 ## 📝 **Complete Example**
 
 ```json
@@ -95,7 +85,6 @@ The AI analyzer returns optimization recommendations in a standardized JSON form
     "impact_time_minutes": 3.5,
     "monthly_cost_savings": 89.60,
     "confidence_score": 0.9,
-    "implementation_effort": "low",
     "implementation": "Add actions/cache@v3 before npm ci step with path ~/.npm and key based on package-lock.json hash",
     "code_example": "- name: Cache Node.js dependencies\\n  uses: actions/cache@v3\\n  with:\\n    path: ~/.npm\\n    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}\\n    restore-keys: |\\n      ${{ runner.os }}-node-"
   },
@@ -109,7 +98,6 @@ The AI analyzer returns optimization recommendations in a standardized JSON form
     "impact_time_minutes": 12.0,
     "monthly_cost_savings": 384.00,
     "confidence_score": 0.8,
-    "implementation_effort": "medium",
     "implementation": "Split test job into parallel unit-test, integration-test, and e2e-test jobs using matrix strategy",
     "code_example": "jobs:\\n  test:\\n    strategy:\\n      matrix:\\n        test-type: [unit, integration, e2e]\\n    steps:\\n      - name: Run ${{ matrix.test-type }} tests\\n        run: npm run test:${{ matrix.test-type }}"
   },
@@ -123,7 +111,6 @@ The AI analyzer returns optimization recommendations in a standardized JSON form
     "impact_time_minutes": 6.0,
     "monthly_cost_savings": 192.00,
     "confidence_score": 0.85,
-    "implementation_effort": "low",
     "implementation": "Replace docker build with docker/build-push-action and enable GitHub Actions cache",
     "code_example": "- name: Build Docker image\\n  uses: docker/build-push-action@v4\\n  with:\\n    context: .\\n    push: true\\n    tags: myapp:latest\\n    cache-from: type=gha\\n    cache-to: type=gha,mode=max"
   },
@@ -137,7 +124,6 @@ The AI analyzer returns optimization recommendations in a standardized JSON form
     "impact_time_minutes": 2.0,
     "monthly_cost_savings": 64.00,
     "confidence_score": 0.7,
-    "implementation_effort": "low", 
     "implementation": "Add paths filter to only trigger on documentation and configuration changes",
     "code_example": "on:\\n  push:\\n    paths:\\n      - 'docs/**'\\n      - '*.md'\\n      - 'mkdocs.yml'\\n  pull_request:\\n    paths:\\n      - 'docs/**'\\n      - '*.md'\\n      - 'mkdocs.yml'"
   }

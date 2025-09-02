@@ -98,6 +98,9 @@ Releases are triggered by pushing tags:
 git checkout main
 git pull origin main
 
+# Update documentation versions before tagging
+python scripts/update-docs-version.py
+
 # Create and push tag to trigger release
 git tag v0.2.0
 git push origin v0.2.0
@@ -117,6 +120,21 @@ Both methods automatically:
 - Create GitHub release with changelog
 - Build and upload packages  
 - Update version in code
+
+### Documentation Versioning
+
+**Important**: All documentation must be version-aligned with releases:
+
+```bash
+# Before any release, update documentation versions
+python scripts/update-docs-version.py
+```
+
+This ensures:
+- `src/gha_optimizer/docs/optimization-patterns.md` references the correct version
+- AI analyzer validates documentation version matches tool version  
+- Users get consistent recommendations based on their tool version
+- Version-specific documentation links work correctly
 
 ## 📚 Code Examples
 

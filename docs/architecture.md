@@ -18,12 +18,10 @@ graph TD
     F --> I
     
     I --> J[Anthropic Claude API]
-    I --> K[OpenAI API]
-    I --> L[Fallback Pattern Analysis]
+    I --> K[Documentation-Driven Analysis]
     
     J --> M[Structured AI Response]
     K --> M
-    L --> M
     
     M --> N[Response Parser & Validator]
     N --> O[Standardized Recommendations]
@@ -129,17 +127,19 @@ class Workflow:
 
 ```python
 class AIWorkflowAnalyzer:
+    def __init__(self, config: Config, logger: Optional[logging.Logger] = None, local_docs: bool = False)
     def analyze_workflows(self, workflows: Dict[str, str], repository_stats: Dict[str, Any]) -> List[Dict[str, Any]]
-    def _call_anthropic_api(self, prompt: str) -> List[Dict[str, Any]]
-    def _fallback_pattern_analysis(self, prompt: str) -> List[Dict[str, Any]]
+    def generate_prompt_only(self, workflows: Dict[str, str], repository_stats: Dict[str, Any]) -> str
+    def _get_optimization_patterns_from_docs(self) -> str
 ```
 
 **AI Features**:
 - **Anthropic Claude Integration**: Advanced AI-powered analysis
-- **Structured Prompts**: Based on documented optimization patterns
-- **Robust Fallback**: Pattern-based analysis when AI API fails
+- **Documentation-Driven Analysis**: Uses version-aligned optimization patterns for consistent recommendations
+- **Remote-First Strategy**: Fetches documentation from GitHub for prompt economy, fallback to local
 - **Cost Calculations**: Real GitHub Actions pricing integration
 - **Confidence Scoring**: AI-provided confidence levels for recommendations
+- **Debug Mode**: `--local-docs` CLI flag for debugging with local documentation
 
 ### 5. **Console Reporter** (`reports/console_reporter.py`)
 
@@ -217,6 +217,7 @@ GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs
 
 - **AI Services**: 
   - Anthropic Claude API for intelligent analysis
+  - Version-aligned documentation from GitHub for consistency
 - **GitHub API**: REST API for workflow and run data collection
 - **Configuration**: YAML-based config with environment variable support
 
@@ -234,6 +235,9 @@ gha-optimizer --config config.yml scan facebook/react
 export GITHUB_TOKEN=ghp_xxx
 export ANTHROPIC_API_KEY=sk-ant-xxx
 gha-optimizer scan microsoft/vscode --max-history-days 7
+
+# Debug mode with local documentation
+gha-optimizer scan microsoft/vscode --local-docs --output-prompt-file debug.txt
 ```
 
 ### Configuration Options
